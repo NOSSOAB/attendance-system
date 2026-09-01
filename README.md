@@ -1,45 +1,92 @@
 # Hệ thống điểm danh
 
-## Cấu trúc
+Hệ thống gồm backend NestJS, ứng dụng Flutter, PostgreSQL, xác thực khuôn mặt
+và điểm danh BLE.
 
-- `apps/backend/`: API NestJS và Prisma.
-- `apps/frontend_student/`: ứng dụng Flutter.
-- `services/face_auth/`: dịch vụ xác thực khuôn mặt.
-- `infra/`: Docker Compose và cấu hình triển khai.
+## Thành phần
 
-## Chạy bằng Docker
+| Thư mục | Nội dung |
+| --- | --- |
+| `apps/backend/` | API NestJS, Prisma và nghiệp vụ điểm danh. |
+| `apps/frontend_student/` | Ứng dụng Flutter cho sinh viên. |
+| `services/face_auth/` | API xác thực khuôn mặt và kiểm tra sống. |
+| `infra/` | Docker Compose, Nginx và hướng dẫn triển khai. |
 
-1. Tạo file môi trường:
+## Yêu cầu
 
-   ```powershell
-   Copy-Item infra\.env.example infra\.env
-   ```
+- Docker Engine và Docker Compose để chạy toàn bộ hệ thống.
+- Node.js để chạy backend trực tiếp.
+- Flutter SDK để chạy ứng dụng sinh viên.
+- PostgreSQL đã có dữ liệu hoặc quyền để migration tạo database mới.
 
-2. Mở `infra/.env` và thay các giá trị bí mật mẫu.
+## Cấu hình môi trường
 
-3. Khởi động hệ thống:
+Mẫu biến môi trường nằm trong `infra/.env.example` và
+`apps/backend/.env.example`.
 
-   ```powershell
-   docker compose --env-file infra/.env -f infra/compose.production.yaml up --build -d
-   ```
+### Chạy bằng Docker
 
-4. Kiểm tra trạng thái:
+```powershell
+Copy-Item infra\.env.example infra\.env
+```
 
-   ```powershell
-   docker compose --env-file infra/.env -f infra/compose.production.yaml ps
-   ```
+Mở `infra/.env` và thay các giá trị sau bằng giá trị riêng của môi trường:
 
-Migration database chạy tự động trước khi backend khởi động.
+- `POSTGRES_PASSWORD`
+- `JWT_SECRET`
+- `FACE_CLIENT_API_KEY`
+- `FACE_ADMIN_API_KEY`
+
+### Chạy backend trực tiếp
+
+```powershell
+Copy-Item apps\backend\.env.example apps\backend\.env
+```
+
+Mở `apps/backend/.env` và cấu hình các chuỗi kết nối database.
+
+## Chạy toàn bộ hệ thống bằng Docker
+
+```powershell
+docker compose --env-file infra/.env -f infra/compose.production.yaml up --build -d
+```
+
+Kiểm tra các container:
+
+```powershell
+docker compose --env-file infra/.env -f infra/compose.production.yaml ps
+```
+
+Kiểm tra API:
+
+```powershell
+curl http://localhost/health
+curl http://localhost/face-api/api/v1/health
+```
+
+Container `migration` tự tạo các database cần thiết và chạy toàn bộ Prisma
+migration trước khi backend khởi động.
 
 ## Chạy khi phát triển
 
+### Khởi động PostgreSQL cục bộ
+
 ```powershell
 docker compose -f infra/compose.yaml up -d
+```
 
+### Khởi động backend
+
+```powershell
 cd apps/backend
 npm install
+npx prisma migrate deploy
 npm run start:dev
 ```
+
+### Khởi động ứng dụng Flutter
+
+Mở một cửa sổ dòng lệnh khác:
 
 ```powershell
 cd apps/frontend_student
@@ -47,15 +94,85 @@ flutter pub get
 flutter run
 ```
 
+Khi chạy thiết bị thật, đặt địa chỉ API của máy chủ:
+
+```powershell
+flutter run --dart-define=API_BASE_URL=https://<máy-chủ>
+```
+
 ## Xác thực khuôn mặt
 
-Dữ liệu khuôn mặt được lưu trong bảng `FaceIdentity` của PostgreSQL. Database
-phải có dữ liệu đã enroll trước khi sử dụng xác thực khuôn mặt.
+Face Auth đọc embedding từ bảng `FaceIdentity` trong PostgreSQL. Database phải
+có dữ liệu khuôn mặt đã enroll trước khi chức năng xác thực được sử dụng.
 
-Hướng dẫn triển khai xem tại `infra/DEPLOY_EC2.md`. Hướng dẫn chạy tải lớn xem
-tại `infra/DEPLOY_300_STUDENTS.md`.
+Để enroll bằng Python:
 
-## Dữ liệu không đưa lên GitHub
+```powershell
+cd services/face_auth
+python -m venv .venv
+.\.venv\Scripts\python -m pip install -r requirements.txt
+$env:FACE_DATABASE_URL = "postgresql://<người-dùng>:<mật-khẩu>@<máy-chủ>:5432/<database>"
+.\.venv\Scripts\python enroll_faces.py
+```
 
-Không đưa `.env`, mật khẩu, API key, database dump, ảnh khuôn mặt, embedding,
-file model tải về hoặc thư mục build lên GitHub.
+Ảnh enroll chỉ lưu tại máy thực hiện enroll. Chúng không được đưa lên GitHub.
+
+Khi chạy Docker Compose, Dockerfile tự tải model cần thiết trong quá trình
+build. Không cần sao chép thêm source hoặc model từ project khác.
+
+## Điểm danh BLE
+
+Ứng dụng Flutter có hai chế độ quét BLE:
+
+- Chế độ mô phỏng: `--dart-define=USE_MOCK_BLE=true`.
+- Chế độ thiết bị thật: `--dart-define=USE_MOCK_BLE=false`.
+
+Thiết bị BLE cần quảng bá đúng tên, mã beacon và Service UUID đã cấu hình trong
+backend.
+
+## Tài khoản demo
+
+Chỉ dùng trên database thử nghiệm:
+
+```powershell
+cd apps/backend
+npm run seed:demo-auth
+```
+
+Không chạy lệnh này trên database đang sử dụng thật.
+
+## Triển khai
+
+- Triển khai EC2: `infra/DEPLOY_EC2.md`.
+- Thử tải 300 sinh viên: `infra/DEPLOY_300_STUDENTS.md`.
+
+Sử dụng HTTPS trước khi cho người dùng truy cập từ Internet.
+
+## Kiểm thử
+
+```powershell
+cd apps/backend
+npm run test
+```
+
+```powershell
+cd services/face_auth
+python -m unittest discover -s tests -v
+```
+
+## Quy tắc dữ liệu và Git
+
+Không đưa các dữ liệu sau lên GitHub:
+
+- `.env`, mật khẩu, API key và khóa chứng thực.
+- Database dump và chuỗi kết nối database thật.
+- Ảnh khuôn mặt, embedding và file `face_db`.
+- Model tải về, file build, log, `node_modules` và thư mục cache.
+
+Sau khi thay đổi source:
+
+```powershell
+git add .
+git commit -m "Mô tả thay đổi"
+git push
+```
