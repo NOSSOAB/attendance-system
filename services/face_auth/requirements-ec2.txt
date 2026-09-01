@@ -1,0 +1,2 @@
+-r requirements-backend.txt
+insightface==0.7.3

@@ -1,0 +1,15 @@
+# Keep the repository consistent across Windows, macOS, and Linux.
+* text=auto eol=lf
+
+# Do not transform binary application assets.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.ico binary
+*.pdf binary
+*.apk binary
+*.jar binary
+*.task binary
+*.onnx binary
+*.jks binary
+*.keystore binary

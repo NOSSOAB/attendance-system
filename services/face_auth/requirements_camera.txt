@@ -1,0 +1,2 @@
+# Compatibility alias for old setup scripts.
+-r requirements-backend.txt

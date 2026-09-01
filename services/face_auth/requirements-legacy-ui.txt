@@ -1,0 +1,4 @@
+# Optional dependencies for the old Streamlit UI. The mobile backend does not need them.
+-r requirements-backend.txt
+streamlit>=1.36.0
+matplotlib>=3.8.0

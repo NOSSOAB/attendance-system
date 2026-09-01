@@ -1,0 +1,17 @@
+__pycache__
+*.pyc
+logs
+outputs
+mobile_android
+database_faces
+face_db.json
+face_db.pkl
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+*.apk
+*.bat
+models/*.onnx

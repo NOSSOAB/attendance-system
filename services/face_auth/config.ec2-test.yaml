@@ -1,0 +1,69 @@
+paths:
+  database_path: "database_faces"
+  face_db_path: "/data/face_db.json"
+  models_path: "models"
+  output_path: "outputs"
+  log_path: "logs"
+
+backend:
+  session_ttl_seconds: 300
+  max_sessions: 3
+  max_upload_bytes: 2500000
+  max_frame_dimension: 960
+  detector_workers: 1
+  max_inflight_frames: 1
+  queue_timeout_seconds: 1.0
+  verification_workers: 1
+  verification_queue_capacity: 2
+  auto_orient: true
+  dominant_face_ratio: 1.60
+  final_pose_limit: 20
+  debug_save_frames: false
+  debug_frame_interval: 20
+  allow_skip_liveness: false
+
+security:
+  require_client_api_key: true
+  session_start_rate_per_minute: 12
+  session_start_burst: 5
+  frame_rate_per_second: 20
+  frame_rate_burst: 30
+
+thresholds:
+  real_face_threshold: 0.80
+  mobile_real_face_threshold: 0.35
+  recognition_threshold: 0.60
+  min_face_size_ratio: 0.20
+  brightness_threshold: 50
+
+recognition:
+  model_name: "buffalo_l"
+  model_path: "/models/w600k_r50.onnx"
+  intra_op_threads: 1
+
+multi_frame:
+  min_samples: 6
+  max_samples: 12
+  samples_per_challenge: 4
+  sample_interval_seconds: 0.20
+  jpeg_quality: 82
+  recognition_sample_count: 3
+  min_recognition_pass_ratio: 0.67
+
+liveness:
+  enabled: true
+  number_of_challenges: 3
+  challenge_actions: [blink, turn_left, turn_right, smile, mouth_open]
+  challenge_timeout_seconds: 8
+  retry_per_challenge: 2
+  confirmation_frames: 2
+  min_action_delay_seconds: 0.25
+  blink_threshold: 0.20
+  smile_threshold: 1.30
+  mouth_open_threshold: 0.60
+  yaw_left_threshold: -20
+  yaw_right_threshold: 20
+  pitch_up_threshold: -15
+  pitch_down_threshold: 15
+  roll_left_threshold: -15
+  roll_right_threshold: 15

@@ -1,0 +1,298 @@
+name: smart-attendance-300
+
+x-logging: &default-logging
+  driver: local
+  options:
+    max-size: 20m
+    max-file: "5"
+
+x-backend-environment: &backend-environment
+  NODE_ENV: production
+  PORT: 3000
+  CORS_ORIGIN: ${CORS_ORIGIN:-}
+  JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+  JWT_TTL_SECONDS: ${JWT_TTL_SECONDS:-28800}
+  DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-20}
+  DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-attendance_db}
+  POSTGRES_ADMIN_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/postgres
+  HUCE_STUDENT_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${HUCE_STUDENT_DB:-huce_student_db}
+  HUCE_LECTURER_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${HUCE_LECTURER_DB:-huce_lecturer_db}
+  HUST_STUDENT_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${HUST_STUDENT_DB:-hust_student_db}
+  HUST_LECTURER_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${HUST_LECTURER_DB:-hust_lecturer_db}
+  FACE_AUTH_INTERNAL_URL: http://face-01:8000
+  FACE_AUTH_SHARDS: face-01=http://face-01:8000,face-02=http://face-02:8000,face-03=http://face-03:8000,face-04=http://face-04:8000,face-05=http://face-05:8000,face-06=http://face-06:8000,face-07=http://face-07:8000,face-08=http://face-08:8000,face-09=http://face-09:8000,face-10=http://face-10:8000,face-11=http://face-11:8000,face-12=http://face-12:8000,face-13=http://face-13:8000,face-14=http://face-14:8000,face-15=http://face-15:8000,face-16=http://face-16:8000,face-17=http://face-17:8000,face-18=http://face-18:8000,face-19=http://face-19:8000,face-20=http://face-20:8000,face-21=http://face-21:8000,face-22=http://face-22:8000,face-23=http://face-23:8000,face-24=http://face-24:8000,face-25=http://face-25:8000,face-26=http://face-26:8000,face-27=http://face-27:8000,face-28=http://face-28:8000,face-29=http://face-29:8000,face-30=http://face-30:8000,face-31=http://face-31:8000,face-32=http://face-32:8000,face-33=http://face-33:8000,face-34=http://face-34:8000,face-35=http://face-35:8000,face-36=http://face-36:8000,face-37=http://face-37:8000,face-38=http://face-38:8000,face-39=http://face-39:8000,face-40=http://face-40:8000
+  FACE_CLIENT_API_KEY: ${FACE_CLIENT_API_KEY:?FACE_CLIENT_API_KEY is required}
+  DEMO_STUDENT_FACE_IDENTITY: ${DEMO_STUDENT_FACE_IDENTITY:-}
+  BLE_TEST_BEACON_ID: ${BLE_TEST_BEACON_ID:-ESP32_TEST_01}
+  BLE_TEST_DEVICE_NAME: ${BLE_TEST_DEVICE_NAME:-ATTENDANCE_BLE_TEST}
+  BLE_TEST_SERVICE_UUID: ${BLE_TEST_SERVICE_UUID:-12345678-1234-1234-1234-123456789abc}
+  BLE_TEST_MIN_RSSI: ${BLE_TEST_MIN_RSSI:--80}
+
+x-face-auth-common: &face-auth-common
+  build:
+    context: ../services/face_auth
+    dockerfile: Dockerfile
+  image: smart-attendance-face-auth:${FACE_BUILD_VERSION:-3.0-300-students}
+  restart: unless-stopped
+  depends_on:
+    postgres:
+      condition: service_healthy
+    migration:
+      condition: service_completed_successfully
+  environment:
+    FACE_CLIENT_API_KEY: ${FACE_CLIENT_API_KEY:?FACE_CLIENT_API_KEY is required}
+    FACE_ADMIN_API_KEY: ${FACE_ADMIN_API_KEY:?FACE_ADMIN_API_KEY is required}
+    FACE_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-attendance_db}
+    FACE_BUILD_VERSION: ${FACE_BUILD_VERSION:-3.0-300-students}
+    FACE_PRODUCTION: "true"
+    FACE_EXPOSE_DOCS: "false"
+    FACE_EXPOSE_HEALTH_DETAILS: "false"
+    FACE_CORS_ORIGINS: ""
+  volumes:
+    - type: bind
+      source: ../services/face_auth/config.ec2-300.yaml
+      target: /app/config.yaml
+      read_only: true
+      bind:
+        create_host_path: false
+  tmpfs:
+    - /tmp:size=128m,mode=1777
+    - /app/logs:size=64m,uid=10001,gid=10001,mode=0770
+  read_only: true
+  healthcheck:
+    test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)\""]
+    interval: 20s
+    timeout: 8s
+    retries: 5
+    start_period: 180s
+  logging: *default-logging
+  mem_limit: 2500m
+  cpus: 3.5
+  security_opt:
+    - no-new-privileges:true
+  networks: [internal]
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    restart: unless-stopped
+    command:
+      - postgres
+      - -c
+      - max_connections=300
+      - -c
+      - shared_buffers=2GB
+      - -c
+      - effective_cache_size=6GB
+      - -c
+      - work_mem=8MB
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-attendance_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging: *default-logging
+    mem_limit: 8g
+    cpus: 8.0
+    networks: [internal]
+
+  migration:
+    build:
+      context: ../apps/backend
+      target: migration
+    restart: "no"
+    command: ["node", "scripts/migrate-all.js"]
+    environment: *backend-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *default-logging
+    networks: [internal]
+
+  backend-01:
+    build:
+      context: ../apps/backend
+      target: production
+    image: smart-attendance-backend:${BACKEND_BUILD_VERSION:-3.0-300-students}
+    restart: unless-stopped
+    environment:
+      <<: *backend-environment
+      FACE_SHARD_OFFSET: "0"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+      face-01:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *default-logging
+    mem_limit: 1g
+    cpus: 2.0
+    networks: [internal]
+
+  backend-02:
+    build:
+      context: ../apps/backend
+      target: production
+    image: smart-attendance-backend:${BACKEND_BUILD_VERSION:-3.0-300-students}
+    restart: unless-stopped
+    environment:
+      <<: *backend-environment
+      FACE_SHARD_OFFSET: "10"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+      face-01:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *default-logging
+    mem_limit: 1g
+    cpus: 2.0
+    networks: [internal]
+
+  backend-03:
+    build:
+      context: ../apps/backend
+      target: production
+    image: smart-attendance-backend:${BACKEND_BUILD_VERSION:-3.0-300-students}
+    restart: unless-stopped
+    environment:
+      <<: *backend-environment
+      FACE_SHARD_OFFSET: "20"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+      face-01:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *default-logging
+    mem_limit: 1g
+    cpus: 2.0
+    networks: [internal]
+
+  backend-04:
+    build:
+      context: ../apps/backend
+      target: production
+    image: smart-attendance-backend:${BACKEND_BUILD_VERSION:-3.0-300-students}
+    restart: unless-stopped
+    environment:
+      <<: *backend-environment
+      FACE_SHARD_OFFSET: "30"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+      face-01:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *default-logging
+    mem_limit: 1g
+    cpus: 2.0
+    networks: [internal]
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend-01:
+        condition: service_healthy
+      backend-02:
+        condition: service_healthy
+      backend-03:
+        condition: service_healthy
+      backend-04:
+        condition: service_healthy
+    volumes:
+      - ./nginx/sharded.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+    mem_limit: 1g
+    cpus: 2.0
+    networks: [internal]
+
+  face-01: { <<: *face-auth-common }
+  face-02: { <<: *face-auth-common }
+  face-03: { <<: *face-auth-common }
+  face-04: { <<: *face-auth-common }
+  face-05: { <<: *face-auth-common }
+  face-06: { <<: *face-auth-common }
+  face-07: { <<: *face-auth-common }
+  face-08: { <<: *face-auth-common }
+  face-09: { <<: *face-auth-common }
+  face-10: { <<: *face-auth-common }
+  face-11: { <<: *face-auth-common }
+  face-12: { <<: *face-auth-common }
+  face-13: { <<: *face-auth-common }
+  face-14: { <<: *face-auth-common }
+  face-15: { <<: *face-auth-common }
+  face-16: { <<: *face-auth-common }
+  face-17: { <<: *face-auth-common }
+  face-18: { <<: *face-auth-common }
+  face-19: { <<: *face-auth-common }
+  face-20: { <<: *face-auth-common }
+  face-21: { <<: *face-auth-common }
+  face-22: { <<: *face-auth-common }
+  face-23: { <<: *face-auth-common }
+  face-24: { <<: *face-auth-common }
+  face-25: { <<: *face-auth-common }
+  face-26: { <<: *face-auth-common }
+  face-27: { <<: *face-auth-common }
+  face-28: { <<: *face-auth-common }
+  face-29: { <<: *face-auth-common }
+  face-30: { <<: *face-auth-common }
+  face-31: { <<: *face-auth-common }
+  face-32: { <<: *face-auth-common }
+  face-33: { <<: *face-auth-common }
+  face-34: { <<: *face-auth-common }
+  face-35: { <<: *face-auth-common }
+  face-36: { <<: *face-auth-common }
+  face-37: { <<: *face-auth-common }
+  face-38: { <<: *face-auth-common }
+  face-39: { <<: *face-auth-common }
+  face-40: { <<: *face-auth-common }
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  postgres_data:

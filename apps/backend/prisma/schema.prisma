@@ -1,0 +1,362 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model School {
+  id              Int              @id @default(autoincrement())
+  code            String           @unique
+  name            String
+  faculties       Faculty[]
+  students        Student[]
+  lecturers       Lecturer[]
+  courses         Course[]
+  courseOfferings CourseOffering[]
+  announcements   Announcement[]
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model Faculty {
+  id        Int            @id @default(autoincrement())
+  schoolId  Int
+  code      String
+  name      String
+  school    School         @relation(fields: [schoolId], references: [id])
+  classes   StudentClass[]
+  lecturers Lecturer[]
+  courses   Course[]
+
+  @@unique([schoolId, code])
+}
+
+model StudentClass {
+  id              Int              @id @default(autoincrement())
+  facultyId       Int
+  code            String
+  name            String
+  faculty         Faculty          @relation(fields: [facultyId], references: [id])
+  students        Student[]
+  schedules       Schedule[]
+  courseOfferings CourseOffering[]
+  announcements   Announcement[]
+
+  @@unique([facultyId, code])
+}
+
+model Student {
+  id              Int       @id @default(autoincrement())
+  schoolId        Int
+  classId         Int
+  mssv            String
+  fullName        String
+  faceIdentityKey String?   @unique
+  dateOfBirth     DateTime?
+  citizenId       String?
+  email           String?
+  phoneNumber     String?
+  isActive        Boolean   @default(true)
+
+  school              School                     @relation(fields: [schoolId], references: [id])
+  studentClass        StudentClass               @relation(fields: [classId], references: [id])
+  account             StudentAccount?
+  enrollments         Enrollment[]
+  offeringEnrollments CourseOfferingEnrollment[]
+  attendanceRecords   AttendanceRecord[]
+  notifications       StudentNotification[]
+
+  @@unique([schoolId, mssv])
+}
+
+/// Biometric embeddings are stored only in PostgreSQL, never in the source tree.
+/// The Face Auth service reads this table through its private database connection.
+model FaceIdentity {
+  id            Int      @id @default(autoincrement())
+  identityKey   String   @unique
+  embeddings    Json
+  meanEmbedding Json
+  imageCount    Int      @default(0)
+  modelName     String   @default("buffalo_l")
+  threshold     Float    @default(0.60)
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@index([isActive, updatedAt])
+}
+
+model StudentAccount {
+  id           Int       @id @default(autoincrement())
+  studentId    Int       @unique
+  passwordHash String
+  lastLoginAt  DateTime?
+  student      Student   @relation(fields: [studentId], references: [id])
+}
+
+model Lecturer {
+  id           Int       @id @default(autoincrement())
+  schoolId     Int
+  facultyId    Int?
+  lecturerCode String
+  fullName     String
+  dateOfBirth  DateTime?
+  citizenId    String?
+  email        String?
+  phoneNumber  String?
+  isActive     Boolean   @default(true)
+
+  school              School                 @relation(fields: [schoolId], references: [id])
+  faculty             Faculty?               @relation(fields: [facultyId], references: [id])
+  account             LecturerAccount?
+  schedules           Schedule[]
+  scheduleAssignments ScheduleLecturer[]
+  notifications       LecturerNotification[]
+
+  @@unique([schoolId, lecturerCode])
+}
+
+model LecturerAccount {
+  id           Int       @id @default(autoincrement())
+  lecturerId   Int       @unique
+  passwordHash String
+  lastLoginAt  DateTime?
+  lecturer     Lecturer  @relation(fields: [lecturerId], references: [id])
+}
+
+model Course {
+  id              Int              @id @default(autoincrement())
+  schoolId        Int
+  facultyId       Int
+  code            String
+  name            String
+  credits         Int              @default(3)
+  school          School           @relation(fields: [schoolId], references: [id])
+  faculty         Faculty          @relation(fields: [facultyId], references: [id])
+  schedules       Schedule[]
+  enrollments     Enrollment[]
+  courseOfferings CourseOffering[]
+
+  @@unique([schoolId, code])
+}
+
+model Enrollment {
+  id        Int     @id @default(autoincrement())
+  studentId Int
+  courseId  Int
+  student   Student @relation(fields: [studentId], references: [id])
+  course    Course  @relation(fields: [courseId], references: [id])
+
+  @@unique([studentId, courseId])
+}
+
+model CourseOffering {
+  id           Int                        @id @default(autoincrement())
+  schoolId     Int
+  courseId     Int
+  classId      Int
+  code         String
+  termCode     String?
+  termName     String?
+  startsAt     DateTime?
+  endsAt       DateTime?
+  isActive     Boolean                    @default(true)
+  sourceSystem String?
+  sourceId     String?
+  sourceTermId String?
+  sourceStatus String?
+  school       School                     @relation(fields: [schoolId], references: [id])
+  course       Course                     @relation(fields: [courseId], references: [id])
+  studentClass StudentClass               @relation(fields: [classId], references: [id])
+  enrollments  CourseOfferingEnrollment[]
+  schedules    Schedule[]
+
+  @@unique([schoolId, sourceSystem, sourceId])
+  @@index([schoolId, sourceSystem, sourceTermId])
+  @@index([schoolId, isActive, startsAt, endsAt])
+  @@index([courseId, classId])
+}
+
+model CourseOfferingEnrollment {
+  id           Int            @id @default(autoincrement())
+  offeringId   Int
+  studentId    Int
+  isActive     Boolean        @default(true)
+  sourceSystem String?
+  sourceId     String?
+  sourceStatus String?
+  offering     CourseOffering @relation(fields: [offeringId], references: [id])
+  student      Student        @relation(fields: [studentId], references: [id])
+
+  @@unique([offeringId, studentId])
+  @@unique([sourceSystem, sourceId])
+  @@index([studentId, isActive])
+  @@index([offeringId, isActive])
+}
+
+model Schedule {
+  id                  Int                 @id @default(autoincrement())
+  courseId            Int
+  classId             Int
+  lecturerId          Int?
+  offeringId          Int?
+  sourceSystem        String?
+  /// Stable source meeting identifier used for idempotent ETL.
+  sourceId            String?
+  startsAt            DateTime?
+  endsAt              DateTime?
+  recurrenceKind      String              @default("weekly")
+  isActive            Boolean             @default(true)
+  dayOfWeek           Int
+  startTime           String
+  endTime             String
+  room                String
+  course              Course              @relation(fields: [courseId], references: [id])
+  studentClass        StudentClass        @relation(fields: [classId], references: [id])
+  lecturer            Lecturer?           @relation(fields: [lecturerId], references: [id])
+  offering            CourseOffering?     @relation(fields: [offeringId], references: [id])
+  lecturerAssignments ScheduleLecturer[]
+  attendanceSessions  AttendanceSession[]
+
+  @@unique([sourceSystem, sourceId])
+  @@index([isActive, startsAt, endsAt])
+  @@index([offeringId])
+}
+
+model ScheduleLecturer {
+  id           Int      @id @default(autoincrement())
+  scheduleId   Int
+  lecturerId   Int
+  role         String   @default("co_lecturer")
+  isActive     Boolean  @default(true)
+  sourceSystem String?
+  sourceId     String?
+  sourceStatus String?
+  schedule     Schedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+  lecturer     Lecturer @relation(fields: [lecturerId], references: [id])
+
+  @@unique([scheduleId, lecturerId])
+  @@unique([sourceSystem, sourceId])
+  @@index([lecturerId, isActive])
+}
+
+model ImportCheckpoint {
+  id           Int       @id @default(autoincrement())
+  jobKey       String
+  targetScope  String
+  sourceSystem String
+  termSourceId String
+  status       String
+  summary      Json
+  startedAt    DateTime  @default(now())
+  completedAt  DateTime?
+  updatedAt    DateTime  @updatedAt
+
+  @@unique([jobKey, targetScope])
+  @@index([sourceSystem, termSourceId])
+}
+
+/// Fail-closed identity marker for central/student/lecturer database roles.
+model DatabaseScopeMarker {
+  id         Int      @id @default(1)
+  scope      String   @unique
+  schoolCode String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Announcement {
+  id           Int           @id @default(autoincrement())
+  schoolId     Int
+  classId      Int?
+  title        String
+  body         String
+  type         String        @default("general")
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  school       School        @relation(fields: [schoolId], references: [id])
+  studentClass StudentClass? @relation(fields: [classId], references: [id])
+}
+
+model AttendanceSession {
+  id             Int                   @id @default(autoincrement())
+  scheduleId     Int
+  attendanceDate DateTime
+  openedAt       DateTime?
+  lateAt         DateTime?
+  closesAt       DateTime?
+  beaconId       String?
+  roomId         String?
+  bleServiceUuid String?
+  bleMinRssi     Int                   @default(-80)
+  status         String                @default("scheduled")
+  createdAt      DateTime              @default(now())
+  updatedAt      DateTime              @updatedAt
+  schedule       Schedule              @relation(fields: [scheduleId], references: [id])
+  records        AttendanceRecord[]
+  notifications  StudentNotification[]
+
+  @@unique([scheduleId, attendanceDate])
+}
+
+model AttendanceRecord {
+  id                Int               @id @default(autoincrement())
+  sessionId         Int
+  studentId         Int
+  status            String
+  scanResult        String            @default("pending")
+  faceSessionId     String?           @unique
+  faceIdentityKey   String?
+  faceSimilarity    Float?
+  faceVerifiedAt    DateTime?
+  bleBeaconId       String?
+  bleRoomId         String?
+  bleDeviceName     String?
+  bleServiceUuid    String?
+  bleRssi           Int?
+  bleScannedAt      DateTime?
+  bleScanDurationMs Int?
+  decisionReason    String?
+  evidence          Json?
+  checkInAt         DateTime?
+  scanAttempts      Int               @default(0)
+  lastFailureReason String?
+  note              String?
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  session           AttendanceSession @relation(fields: [sessionId], references: [id])
+  student           Student           @relation(fields: [studentId], references: [id])
+
+  @@unique([sessionId, studentId])
+}
+
+model StudentNotification {
+  id        Int                @id @default(autoincrement())
+  studentId Int
+  sessionId Int?
+  title     String
+  body      String
+  type      String             @default("general")
+  isRead    Boolean            @default(false)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @updatedAt
+  student   Student            @relation(fields: [studentId], references: [id])
+  session   AttendanceSession? @relation(fields: [sessionId], references: [id])
+}
+
+model LecturerNotification {
+  id           Int      @id @default(autoincrement())
+  lecturerId   Int
+  title        String
+  body         String
+  type         String   @default("general")
+  isRead       Boolean  @default(false)
+  referenceKey String?  @unique
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  lecturer     Lecturer @relation(fields: [lecturerId], references: [id])
+
+  @@index([lecturerId, createdAt])
+}

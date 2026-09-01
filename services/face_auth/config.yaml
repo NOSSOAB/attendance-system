@@ -1,0 +1,88 @@
+camera:
+  camera_id: 1
+  frame_width: 1280
+  frame_height: 720
+
+paths:
+  database_path: "database_faces"
+  face_db_path: "face_db.json"
+  models_path: "models"
+  output_path: "outputs"
+  log_path: "logs"
+
+backend:
+  session_ttl_seconds: 300
+  max_sessions: 200
+  max_upload_bytes: 2500000
+  max_frame_dimension: 960
+  # One MediaPipe task object is not shared between threads. Each detector worker
+  # owns an independent task instance; frame admission stays bounded above it.
+  detector_workers: 3
+  max_inflight_frames: 6
+  queue_timeout_seconds: 0.08
+  # Each verification worker owns an independent PAD + ArcFace ONNX session.
+  verification_workers: 3
+  verification_queue_capacity: 128
+  auto_orient: true
+  dominant_face_ratio: 1.60
+  final_pose_limit: 20
+  debug_save_frames: false
+  debug_frame_interval: 20
+
+thresholds:
+  real_face_threshold: 0.80
+  mobile_real_face_threshold: 0.35
+  recognition_threshold: 0.60
+  min_face_size_ratio: 0.20
+  brightness_threshold: 50
+
+# Chỉ dành cho UI desktop legacy; backend API không nạp Passive PAD.
+anti_spoofing:
+  engine: "mobilenetv3_onnx"
+  model_path: "models/anti-spoof-mn3.onnx"
+  model_sha384: "6de4534964b723397b3e8c995cadcf43bc007cc2f9930b95ae25f76adccece5d1d4d058d0b15117b9e4a9f758424f92a"
+  crop_scale: 1.35
+  intra_op_threads: 1
+
+recognition:
+  model_name: "buffalo_l"
+  # Independent workers scale better when each ONNX session uses one CPU thread.
+  intra_op_threads: 1
+
+multi_frame:
+  min_samples: 6
+  max_samples: 12
+  samples_per_challenge: 4
+  sample_interval_seconds: 0.20
+  jpeg_quality: 82
+  recognition_sample_count: 3
+  min_recognition_pass_ratio: 0.67
+
+liveness:
+  enabled: true
+  number_of_challenges: 3
+  challenge_actions:
+    - blink
+    - turn_left
+    - turn_right
+    - smile
+    - mouth_open
+  challenge_timeout_seconds: 8
+  retry_per_challenge: 2
+  confirmation_frames: 2
+  min_action_delay_seconds: 0.25
+  blink_threshold: 0.20
+  smile_threshold: 1.30
+  mouth_open_threshold: 0.60
+  yaw_left_threshold: -20
+  yaw_right_threshold: 20
+  pitch_up_threshold: -15
+  pitch_down_threshold: 15
+  roll_left_threshold: -15
+  roll_right_threshold: 15
+  straight_face_seconds: 2
+
+ui:
+  show_landmarks: true
+  show_bounding_box: true
+  show_debug_scores: true

@@ -1,0 +1,153 @@
+name: smart-attendance
+
+x-logging: &default-logging
+  driver: local
+  options:
+    max-size: 10m
+    max-file: "3"
+
+services:
+  postgres:
+    image: ${POSTGRES_IMAGE:-postgres:16}
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-attendance_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    logging: *default-logging
+    mem_limit: 256m
+    cpus: 0.50
+    networks: [internal]
+
+  migration:
+    build:
+      context: ../apps/backend
+      target: migration
+    restart: "no"
+    command: ["node", "scripts/migrate-all.js"]
+    environment: &backend-environment
+      NODE_ENV: production
+      PORT: 3000
+      CORS_ORIGIN: ${CORS_ORIGIN:-}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      JWT_TTL_SECONDS: ${JWT_TTL_SECONDS:-28800}
+      DATABASE_POOL_MAX: ${DATABASE_POOL_MAX:-20}
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-attendance_db}
+      POSTGRES_ADMIN_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/postgres
+      HUCE_STUDENT_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${HUCE_STUDENT_DB:-huce_student_db}
+      HUCE_LECTURER_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${HUCE_LECTURER_DB:-huce_lecturer_db}
+      HUST_STUDENT_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${HUST_STUDENT_DB:-hust_student_db}
+      HUST_LECTURER_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${HUST_LECTURER_DB:-hust_lecturer_db}
+      FACE_AUTH_INTERNAL_URL: http://face-auth:8000
+      FACE_CLIENT_API_KEY: ${FACE_CLIENT_API_KEY:?FACE_CLIENT_API_KEY is required}
+      DEMO_STUDENT_FACE_IDENTITY: ${DEMO_STUDENT_FACE_IDENTITY:-}
+      BLE_TEST_BEACON_ID: ${BLE_TEST_BEACON_ID:-ESP32_TEST_01}
+      BLE_TEST_DEVICE_NAME: ${BLE_TEST_DEVICE_NAME:-ATTENDANCE_BLE_TEST}
+      BLE_TEST_SERVICE_UUID: ${BLE_TEST_SERVICE_UUID:-12345678-1234-1234-1234-123456789abc}
+      BLE_TEST_MIN_RSSI: ${BLE_TEST_MIN_RSSI:--80}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    logging: *default-logging
+    networks: [internal]
+
+  backend:
+    build:
+      context: ../apps/backend
+      target: production
+    restart: unless-stopped
+    environment: *backend-environment
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))\""]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    logging: *default-logging
+    mem_limit: 384m
+    cpus: 0.75
+    networks: [internal]
+
+  nginx:
+    image: nginx:1.27-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    volumes:
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/health >/dev/null 2>&1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    logging: *default-logging
+    mem_limit: 64m
+    cpus: 0.20
+    networks: [internal]
+
+  face-auth:
+    build:
+      context: ../services/face_auth
+      dockerfile: Dockerfile
+    image: smart-attendance-face-auth:${FACE_BUILD_VERSION:-2.1-integrated}
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migration:
+        condition: service_completed_successfully
+    environment:
+      FACE_CLIENT_API_KEY: ${FACE_CLIENT_API_KEY:?FACE_CLIENT_API_KEY is required}
+      FACE_ADMIN_API_KEY: ${FACE_ADMIN_API_KEY:?FACE_ADMIN_API_KEY is required}
+      FACE_DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-attendance_db}
+      FACE_BUILD_VERSION: ${FACE_BUILD_VERSION:-2.1-integrated}
+      FACE_PRODUCTION: "true"
+      FACE_EXPOSE_DOCS: "false"
+      FACE_EXPOSE_HEALTH_DETAILS: "false"
+      FACE_CORS_ORIGINS: ""
+    volumes:
+      - type: bind
+        source: ../services/face_auth/config.ec2-test.yaml
+        target: /app/config.yaml
+        read_only: true
+        bind:
+          create_host_path: false
+      - face_logs:/app/logs
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    read_only: true
+    healthcheck:
+      test: ["CMD-SHELL", "python -c \"import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/v1/health', timeout=5)\""]
+      interval: 30s
+      timeout: 10s
+      retries: 4
+      start_period: 240s
+    logging: *default-logging
+    mem_limit: 600m
+    cpus: 0.75
+    security_opt:
+      - no-new-privileges:true
+    networks: [internal]
+
+networks:
+  internal:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  face_logs:

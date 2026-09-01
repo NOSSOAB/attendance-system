@@ -1,0 +1,75 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.vscode/
+.idea/
+*.iml
+
+# Local-only backups and drafts
+**/.git-local-backup/
+**/local-only/
+
+# Local deployment copies, document workspaces, and release artifacts
+# Keep the versioned deployment definitions under infra/ instead.
+.deploy/
+.docx_work/
+outputs/
+
+# Environment and secrets
+**/.env
+**/.env.*
+!**/.env.example
+!**/.env.*.example
+*.pem
+*.key
+*.crt
+*.p12
+*.jks
+*.keystore
+key.properties
+google-services.json
+GoogleService-Info.plist
+firebase_options.dart
+
+# Node / Nest
+**/node_modules/
+**/dist/
+**/coverage/
+**/.nyc_output/
+**/.temp/
+**/.tmp/
+
+# Python / Face Auth runtime state
+**/__pycache__/
+**/.venv/
+**/.pytest_cache/
+**/.mypy_cache/
+services/face_auth/database_faces/
+services/face_auth/face_db.json
+services/face_auth/face_db.pkl
+services/face_auth/logs/
+services/face_auth/outputs/
+services/face_auth/models/*.onnx
+
+# Flutter / Dart
+**/.dart_tool/
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+**/.gradle/
+**/.packages
+**/build/
+
+# Generated sources
+apps/backend/src/generated/
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+apps/backend/scripts/etl/faculty-map.local.json
+apps/backend/scripts/etl/*.log

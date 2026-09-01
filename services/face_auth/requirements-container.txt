@@ -1,0 +1,22 @@
+# Exact production runtime set. MediaPipe is installed --no-deps in Docker to
+# avoid unused JAX/audio/OpenCV-contrib packages; the imports used by this API
+# are covered explicitly below.
+opencv-python==4.10.0.84
+onnx==1.21.0
+onnxruntime==1.26.0
+numpy==1.26.4
+Pillow==12.2.0
+PyYAML==6.0.3
+requests==2.34.2
+scipy==1.17.1
+scikit-image==0.26.0
+fastapi==0.136.3
+uvicorn==0.47.0
+python-multipart==0.0.29
+psycopg[binary]==3.2.10
+
+absl-py==2.5.0
+attrs==26.1.0
+flatbuffers==25.12.19
+matplotlib==3.11.1
+protobuf==4.25.9
