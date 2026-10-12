@@ -29,6 +29,16 @@ outputs/
 *.jks
 *.keystore
 key.properties
+firmware/esp32-c6/ble_device_secrets.h
+firmware/esp32-c6/ble_device_registry.local.json
+apps/frontend_student/android/app/src/main/assets/models/*.task
+apps/frontend_student/android/app/src/main/assets/models/*.onnx
+apps/frontend_student/assets/smoke/
+.mobile-face-test-venv/
+.tmp-*.onnx
+.tmp-*.jar
+integrity-classes-inspect.jar
+backups/
 google-services.json
 GoogleService-Info.plist
 firebase_options.dart

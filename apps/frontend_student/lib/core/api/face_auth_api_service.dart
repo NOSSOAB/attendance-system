@@ -4,6 +4,57 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
+import '../face/mobile_face_ml.dart';
+import 'app_http_client.dart';
+
+class MobileFaceSessionTicket {
+  final int protocolVersion;
+  final int attendanceSessionId;
+  final String sessionId;
+  final String nonce;
+  final String modelId;
+  final DateTime expiresAt;
+  final List<String> livenessActions;
+
+  const MobileFaceSessionTicket({
+    required this.protocolVersion,
+    required this.attendanceSessionId,
+    required this.sessionId,
+    required this.nonce,
+    required this.modelId,
+    required this.expiresAt,
+    required this.livenessActions,
+  });
+
+  factory MobileFaceSessionTicket.fromJson(Map<String, dynamic> json) =>
+      MobileFaceSessionTicket(
+        protocolVersion: (json['protocolVersion'] as num?)?.toInt() ?? 0,
+        attendanceSessionId: json['attendanceSessionId'] as int? ?? 0,
+        sessionId: json['sessionId'] as String? ?? '',
+        nonce: json['nonce'] as String? ?? '',
+        modelId: json['modelId'] as String? ?? '',
+        expiresAt:
+            DateTime.tryParse(json['expiresAt'] as String? ?? '')?.toUtc() ??
+            DateTime.fromMillisecondsSinceEpoch(0, isUtc: true),
+        livenessActions: (json['livenessActions'] as List<dynamic>? ?? const [])
+            .whereType<String>()
+            .toList(growable: false),
+      );
+}
+
+class MobileFaceCompletionResult {
+  final bool verified;
+  final double similarity;
+  const MobileFaceCompletionResult({
+    required this.verified,
+    required this.similarity,
+  });
+  factory MobileFaceCompletionResult.fromJson(Map<String, dynamic> json) =>
+      MobileFaceCompletionResult(
+        verified: json['verified'] == true,
+        similarity: (json['similarity'] as num?)?.toDouble() ?? 0,
+      );
+}
 
 class FaceSessionTicket {
   final int attendanceSessionId;
@@ -137,7 +188,7 @@ class FaceAuthApiService {
   final String accessToken;
 
   FaceAuthApiService({required this.accessToken, http.Client? client})
-    : _client = client ?? http.Client();
+    : _client = AppHttpClient(inner: client);
 
   Future<FaceSessionTicket> startAttendanceSession({
     required String schoolCode,
@@ -164,6 +215,97 @@ class FaceAuthApiService {
       );
     }
     return ticket;
+  }
+
+  Future<MobileFaceSessionTicket> startMobileAttendanceSession({
+    required int attendanceSessionId,
+  }) async {
+    final response = await _client
+        .post(
+          Uri.parse(
+            '${ApiConfig.baseUrl}/students/attendance/mobile-face-session',
+          ),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({'sessionId': attendanceSessionId}),
+        )
+        .timeout(const Duration(seconds: 15));
+    final ticket = MobileFaceSessionTicket.fromJson(_decodeMap(response));
+    if (ticket.protocolVersion != 3 ||
+        ticket.attendanceSessionId != attendanceSessionId ||
+        ticket.sessionId.isEmpty ||
+        ticket.nonce.isEmpty ||
+        ticket.modelId.isEmpty ||
+        ticket.expiresAt.difference(DateTime.now().toUtc()) <
+            const Duration(seconds: 20) ||
+        ticket.livenessActions.length != 3 ||
+        ticket.livenessActions.toSet().length != 3 ||
+        !ticket.livenessActions.contains('blink') ||
+        !ticket.livenessActions.contains('smile') ||
+        !ticket.livenessActions.contains('turn')) {
+      throw const FaceAuthApiException(
+        'Máy chủ trả về phiên mobile không hợp lệ',
+      );
+    }
+    return ticket;
+  }
+
+  Future<MobileFaceCompletionResult> completeMobileAttendanceSession({
+    required MobileFaceSessionTicket ticket,
+    required List<double> embedding,
+    required String publicKey,
+    required String signature,
+    required MobileLivenessProof livenessProof,
+  }) async {
+    final response = await _client
+        .post(
+          Uri.parse(
+            '${ApiConfig.baseUrl}/students/attendance/mobile-face-session/complete',
+          ),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'protocolVersion': ticket.protocolVersion,
+            'sessionId': ticket.sessionId,
+            'nonce': ticket.nonce,
+            'embedding': embedding,
+            'publicKey': publicKey,
+            'signature': signature,
+            'livenessProof': livenessProof.toJson(),
+          }),
+        )
+        .timeout(const Duration(seconds: 15));
+    return MobileFaceCompletionResult.fromJson(_decodeMap(response));
+  }
+
+  Future<void> enrollMobileFace({
+    required FaceSessionTicket trustedTicket,
+    required List<List<double>> embeddings,
+    required String publicKey,
+  }) async {
+    final response = await _client
+        .post(
+          Uri.parse(
+            '${ApiConfig.baseUrl}/students/attendance/mobile-face-enrollment',
+          ),
+          headers: {
+            'Authorization': 'Bearer $accessToken',
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            'faceSessionId': trustedTicket.faceSessionId,
+            'faceSessionToken': trustedTicket.faceSessionToken,
+            'faceShard': trustedTicket.faceShard,
+            'embeddings': embeddings,
+            'publicKey': publicKey,
+          }),
+        )
+        .timeout(const Duration(seconds: 20));
+    _decodeMap(response);
   }
 
   Future<FaceVerificationResult> sendFrame({

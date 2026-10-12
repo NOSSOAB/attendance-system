@@ -1,5 +1,8 @@
 import { Type } from 'class-transformer';
 import {
+  ArrayMaxSize,
+  ArrayMinSize,
+  IsArray,
   IsBoolean,
   IsDefined,
   IsIn,
@@ -12,6 +15,8 @@ import {
   MaxLength,
   Min,
   MinLength,
+  Matches,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
@@ -44,26 +49,162 @@ export class AttendanceFaceSessionDto {
   sessionId!: number;
 }
 
+export class MobileLivenessProofDto {
+  @IsArray()
+  @ArrayMinSize(3)
+  @ArrayMaxSize(3)
+  @IsIn(['blink', 'smile', 'turn'], { each: true })
+  actions!: Array<'blink' | 'smile' | 'turn'>;
+
+  @IsISO8601({ strict: true })
+  completedAt!: string;
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(12)
+  @Max(240)
+  frameCount!: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0.35)
+  @Max(1)
+  blinkPeak!: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0.3)
+  @Max(1)
+  smilePeak!: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0.18)
+  @Max(1)
+  turnPeak!: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(0.3)
+  neutralBlinkMax!: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(0.3)
+  neutralSmileMax!: number;
+
+  @Type(() => Number)
+  @IsNumber()
+  @Min(0)
+  @Max(0.14)
+  neutralTurnMax!: number;
+}
+
+export class MobileFaceCompleteDto {
+  @Type(() => Number)
+  @IsInt()
+  @IsIn([3], {
+    message: 'Phiên bản ứng dụng đã cũ. Hãy cài APK mới nhất',
+  })
+  protocolVersion!: number;
+
+  @IsString()
+  @MinLength(16)
+  @MaxLength(100)
+  sessionId!: string;
+
+  @IsString()
+  @MinLength(20)
+  @MaxLength(200)
+  nonce!: string;
+
+  @IsString()
+  @MinLength(20)
+  @MaxLength(8_000)
+  publicKey!: string;
+
+  @IsString()
+  @MinLength(8)
+  @MaxLength(1_000)
+  signature!: string;
+
+  @IsDefined({
+    message: 'Phiên bản ứng dụng đã cũ. Hãy cài APK mới nhất',
+  })
+  @IsNumber({}, { each: true })
+  embedding!: number[];
+
+  @ValidateNested()
+  @IsDefined({
+    message: 'Phiên bản ứng dụng đã cũ. Hãy cài APK mới nhất',
+  })
+  @Type(() => MobileLivenessProofDto)
+  livenessProof!: MobileLivenessProofDto;
+}
+
+export class MobileFaceEnrollmentDto {
+  @IsString()
+  @MinLength(1)
+  @MaxLength(200)
+  faceSessionId!: string;
+
+  @IsString()
+  @MinLength(1)
+  @MaxLength(500)
+  faceSessionToken!: string;
+
+  @IsString()
+  @MinLength(7)
+  @MaxLength(7)
+  faceShard!: string;
+
+  @IsString()
+  @MinLength(20)
+  @MaxLength(8_000)
+  publicKey!: string;
+
+  @IsDefined()
+  @IsArray()
+  @ArrayMinSize(2)
+  @ArrayMaxSize(5)
+  embeddings!: number[][];
+}
+
 export class BleEvidenceDto {
+  @IsOptional()
+  @IsBoolean()
+  isMock?: boolean;
+
+  @IsOptional()
+  @IsString()
+  @Matches(/^[A-Za-z0-9+/]{35}=$/)
+  c6Token?: string;
+
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(100)
   beaconId!: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(100)
   roomId!: string;
 
+  @IsOptional()
   @IsString()
   @MinLength(1)
   @MaxLength(100)
   deviceName!: string;
 
+  @ValidateIf((body: BleEvidenceDto) => !body.c6Token)
   @IsString()
   @MinLength(1)
   @MaxLength(100)
-  serviceUuid!: string;
+  serviceUuid?: string;
 
   @Type(() => Number)
   @IsInt()
@@ -112,6 +253,7 @@ export class GpsEvidenceDto {
   @Type(() => Number)
   @IsNumber()
   @Min(0)
+  @Max(100)
   accuracyMeters!: number;
 
   @IsISO8601({ strict: true })
@@ -124,25 +266,34 @@ export class AttendanceScanDto {
   @Min(1)
   sessionId!: number;
 
+  @ValidateIf((body: AttendanceScanDto) => !body.mobileFaceSessionId)
   @IsString()
   @MinLength(1)
   @MaxLength(200)
-  faceSessionId!: string;
+  faceSessionId?: string;
 
+  @ValidateIf((body: AttendanceScanDto) => !body.mobileFaceSessionId)
   @IsString()
   @MinLength(1)
   @MaxLength(500)
-  faceSessionToken!: string;
+  faceSessionToken?: string;
 
+  @ValidateIf((body: AttendanceScanDto) => !body.mobileFaceSessionId)
   @IsString()
   @MinLength(7)
   @MaxLength(7)
-  faceShard!: string;
+  faceShard?: string;
 
+  @IsOptional()
+  @IsString()
+  @MinLength(16)
+  @MaxLength(100)
+  mobileFaceSessionId?: string;
+
+  @IsOptional()
   @ValidateNested()
-  @IsDefined()
   @Type(() => BleEvidenceDto)
-  bleEvidence!: BleEvidenceDto;
+  bleEvidence?: BleEvidenceDto;
 
   @ValidateNested()
   @IsDefined()

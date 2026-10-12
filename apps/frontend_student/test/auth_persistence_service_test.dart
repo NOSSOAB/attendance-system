@@ -255,6 +255,7 @@ final testSession = AuthSessionModel(
   accessToken: 'jwt-access-token',
   tokenType: 'refresh-token-type',
   expiresInSeconds: 7200,
+  expiresAt: DateTime.now().toUtc().add(const Duration(hours: 2)),
   user: AuthUserProfileModel(
     id: 99,
     code: '65CS1001',
@@ -275,6 +276,7 @@ AuthSessionModel sessionWithToken(String token) {
     accessToken: token,
     tokenType: testSession.tokenType,
     expiresInSeconds: testSession.expiresInSeconds,
+    expiresAt: testSession.expiresAt,
     user: testSession.user,
   );
 }

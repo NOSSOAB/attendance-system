@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 
 import '../config/api_config.dart';
+import 'app_http_client.dart';
 
 class LecturerExportResult {
   final String fileName;
@@ -14,8 +15,10 @@ class LecturerExportResult {
 
 class LecturerApiService {
   final String accessToken;
+  final http.Client? client;
 
-  const LecturerApiService({required this.accessToken});
+  const LecturerApiService({required this.accessToken, this.client});
+  http.Client get _client => client ?? AppHttpClient.shared;
 
   Map<String, String> get _headers => {
     'Authorization': 'Bearer $accessToken',
@@ -26,20 +29,14 @@ class LecturerApiService {
     required String schoolCode,
     required String lecturerCode,
   }) {
-    return _get(
-      '/lecturers/home',
-      queryParameters: const {},
-    );
+    return _get('/lecturers/home', queryParameters: const {});
   }
 
   Future<Map<String, dynamic>> getClasses({
     required String schoolCode,
     required String lecturerCode,
   }) {
-    return _get(
-      '/lecturers/classes',
-      queryParameters: const {},
-    );
+    return _get('/lecturers/classes', queryParameters: const {});
   }
 
   Future<Map<String, dynamic>> getClassDetail({
@@ -47,10 +44,7 @@ class LecturerApiService {
     required String lecturerCode,
     required int scheduleId,
   }) {
-    return _get(
-      '/lecturers/classes/$scheduleId',
-      queryParameters: const {},
-    );
+    return _get('/lecturers/classes/$scheduleId', queryParameters: const {});
   }
 
   Future<Map<String, dynamic>> createAttendanceSession({
@@ -65,8 +59,8 @@ class LecturerApiService {
       '/lecturers/classes/$scheduleId/attendance-sessions',
       queryParameters: const {},
       body: {
-        'startAt': startAt.toIso8601String(),
-        if (endAt != null) 'endAt': endAt.toIso8601String(),
+        'startAt': startAt.toUtc().toIso8601String(),
+        if (endAt != null) 'endAt': endAt.toUtc().toIso8601String(),
         'durationMinutes': ?durationMinutes,
       },
     );
@@ -99,7 +93,8 @@ class LecturerApiService {
         if (courseKeyword != null && courseKeyword.trim().isNotEmpty)
           'courseKeyword': courseKeyword.trim(),
         if (attendanceDate != null)
-          'attendanceDate': attendanceDate.toIso8601String(),
+          'attendanceDate':
+              '${attendanceDate.year.toString().padLeft(4, '0')}-${attendanceDate.month.toString().padLeft(2, '0')}-${attendanceDate.day.toString().padLeft(2, '0')}',
       },
     );
   }
@@ -111,9 +106,7 @@ class LecturerApiService {
   }) {
     return _get(
       '/lecturers/statistics',
-      queryParameters: {
-        if (scheduleId != null) 'scheduleId': '$scheduleId',
-      },
+      queryParameters: {if (scheduleId != null) 'scheduleId': '$scheduleId'},
     );
   }
 
@@ -121,10 +114,7 @@ class LecturerApiService {
     required String schoolCode,
     required String lecturerCode,
   }) {
-    return _get(
-      '/lecturers/notifications',
-      queryParameters: const {},
-    );
+    return _get('/lecturers/notifications', queryParameters: const {});
   }
 
   Future<Map<String, dynamic>> markNotificationAsRead({
@@ -142,10 +132,7 @@ class LecturerApiService {
     required String schoolCode,
     required String lecturerCode,
   }) {
-    return _get(
-      '/lecturers/profile',
-      queryParameters: const {},
-    );
+    return _get('/lecturers/profile', queryParameters: const {});
   }
 
   Future<LecturerExportResult> exportAttendance({
@@ -154,13 +141,10 @@ class LecturerApiService {
     required int scheduleId,
     required String scope,
   }) async {
-    final uri = Uri.parse('${ApiConfig.baseUrl}/lecturers/export').replace(
-      queryParameters: {
-        'scheduleId': '$scheduleId',
-        'scope': scope,
-      },
-    );
-    final response = await http.get(uri, headers: _headers);
+    final uri = Uri.parse(
+      '${ApiConfig.baseUrl}/lecturers/export',
+    ).replace(queryParameters: {'scheduleId': '$scheduleId', 'scope': scope});
+    final response = await _client.get(uri, headers: _headers);
 
     if (response.statusCode != 200) {
       final payload = response.body.isEmpty
@@ -182,7 +166,7 @@ class LecturerApiService {
     final uri = Uri.parse(
       '${ApiConfig.baseUrl}$path',
     ).replace(queryParameters: queryParameters);
-    final response = await http.get(uri, headers: _headers);
+    final response = await _client.get(uri, headers: _headers);
     return _decodeJsonResponse(response);
   }
 
@@ -194,7 +178,7 @@ class LecturerApiService {
     final uri = Uri.parse(
       '${ApiConfig.baseUrl}$path',
     ).replace(queryParameters: queryParameters);
-    final response = await http.post(
+    final response = await _client.post(
       uri,
       headers: _headers,
       body: jsonEncode(body ?? const {}),
@@ -209,7 +193,7 @@ class LecturerApiService {
     final uri = Uri.parse(
       '${ApiConfig.baseUrl}$path',
     ).replace(queryParameters: queryParameters);
-    final response = await http.patch(uri, headers: _headers);
+    final response = await _client.patch(uri, headers: _headers);
     return _decodeJsonResponse(response);
   }
 

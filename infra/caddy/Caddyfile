@@ -1,0 +1,59 @@
+{
+    email {$CADDY_EMAIL}
+}
+
+# Caddy obtains and renews the certificate for SERVER_NAME. It redirects HTTP
+# to HTTPS automatically; the application containers remain private on the
+# Docker network and still communicate over HTTP.
+{$SERVER_NAME} {
+    encode zstd gzip
+
+    header {
+        -Server
+        X-Content-Type-Options "nosniff"
+        X-Frame-Options "DENY"
+        Referrer-Policy "no-referrer"
+        Permissions-Policy "camera=(), microphone=(), geolocation=()"
+        Strict-Transport-Security "max-age=31536000; includeSubDomains"
+    }
+
+    @health path /health
+    handle @health {
+        reverse_proxy backend:3000
+    }
+
+    # The app receives face-01 in its signed-in ticket. Remove only the public
+    # gateway prefix before forwarding to the private FastAPI service.
+    @faceOne path /face-api/face-01/*
+    handle @faceOne {
+        request_body {
+            max_size 3MB
+        }
+        uri strip_prefix /face-api/face-01
+        reverse_proxy face-auth:8000 {
+            transport http {
+                read_timeout 120s
+            }
+        }
+    }
+
+    @face path /face-api/*
+    handle @face {
+        request_body {
+            max_size 3MB
+        }
+        uri strip_prefix /face-api
+        reverse_proxy face-auth:8000 {
+            transport http {
+                read_timeout 120s
+            }
+        }
+    }
+
+    handle {
+        request_body {
+            max_size 1MB
+        }
+        reverse_proxy backend:3000
+    }
+}

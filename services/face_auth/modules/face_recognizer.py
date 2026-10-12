@@ -426,6 +426,9 @@ class InsightFaceRecognizer:
                 return path
             raise FileNotFoundError(f"Không tìm thấy recognition model: {path}")
 
+        bundled = resolve_demo_path(self.config, "models_path", "models") / "w600k_r50.onnx"
+        if bundled.is_file():
+            return bundled
         model_dir = Path.home() / ".insightface" / "models" / self.model_name
         preferred = model_dir / "w600k_r50.onnx"
         if preferred.is_file():

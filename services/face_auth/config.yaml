@@ -20,7 +20,7 @@ backend:
   detector_workers: 3
   max_inflight_frames: 6
   queue_timeout_seconds: 0.08
-  # Each verification worker owns an independent PAD + ArcFace ONNX session.
+  # Each verification worker owns an independent ArcFace ONNX session.
   verification_workers: 3
   verification_queue_capacity: 128
   auto_orient: true
@@ -46,6 +46,7 @@ anti_spoofing:
 
 recognition:
   model_name: "buffalo_l"
+  model_path: "models/w600k_r50.onnx"
   # Independent workers scale better when each ONNX session uses one CPU thread.
   intra_op_threads: 1
 

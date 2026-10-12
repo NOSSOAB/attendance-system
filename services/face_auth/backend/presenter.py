@@ -15,6 +15,9 @@ def build_response(
     liveness: LivenessSnapshot,
     dominant_face_ok: Callable[[FaceDetectionResult], bool],
 ) -> dict[str, Any]:
+    if session.stage == SessionStage.LIVENESS and liveness.passed and session.final_message:
+        liveness.current_instruction = session.final_message
+        liveness.message = session.final_message
     return {
         "api_version": "v1",
         "session_id": session.session_id,

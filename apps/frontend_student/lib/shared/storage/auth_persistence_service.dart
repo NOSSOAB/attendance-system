@@ -25,7 +25,8 @@ class StoredAuthState {
   bool get hasSavedSession =>
       rememberSession &&
       session != null &&
-      session!.accessToken.trim().isNotEmpty;
+      session!.accessToken.trim().isNotEmpty &&
+      !session!.isExpired;
 }
 
 abstract interface class AuthKeyValueStore {
@@ -141,9 +142,14 @@ class AuthPersistenceService {
       final school = SchoolModel.fromJson(schoolJson);
       final rememberSession = payload['rememberSession'] == true;
       final sessionJson = payload['session'];
-      final session = sessionJson is Map<String, dynamic>
+      var session = sessionJson is Map<String, dynamic>
           ? _sessionFromSecureJson(sessionJson, role: role, school: school)
           : null;
+
+      if (session != null && session.isExpired) {
+        session = null;
+        await _writeSecurePayload({...payload}..remove('session'));
+      }
 
       return StoredAuthState(
         school: school,
@@ -349,7 +355,11 @@ class AuthPersistenceService {
       try {
         final sessionJson = jsonDecode(sessionRaw);
         if (sessionJson is Map<String, dynamic>) {
-          final session = AuthSessionModel.fromJson(sessionJson);
+          // Old relative TTLs cannot establish when the user actually logged in.
+          final session = AuthSessionModel.fromJson({
+            ...sessionJson,
+            'expiresInSeconds': 0,
+          });
           payload['session'] = _sessionToSecureJson(session);
         }
       } catch (_) {
@@ -426,6 +436,7 @@ class AuthPersistenceService {
   Map<String, dynamic> _sessionToSecureJson(AuthSessionModel session) {
     return {
       'accessToken': session.accessToken,
+      'expiresAt': session.effectiveExpiresAt?.toUtc().toIso8601String(),
       'user': {
         'code': session.user.code,
         'fullName': session.user.fullName,
@@ -464,6 +475,7 @@ class AuthPersistenceService {
       accessToken: accessToken,
       tokenType: 'Bearer',
       expiresInSeconds: 0,
+      expiresAt: AuthSessionModel.resolveExpiry(accessToken, json['expiresAt']),
       user: AuthUserProfileModel(
         id: 0,
         code: code,

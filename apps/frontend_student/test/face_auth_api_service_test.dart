@@ -2,10 +2,89 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend_student/core/api/face_auth_api_service.dart';
+import 'package:frontend_student/core/face/mobile_face_ml.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
 void main() {
+  test(
+    'rejects a face challenge that is already too close to expiry',
+    () async {
+      final client = MockClient((request) async {
+        return http.Response(
+          jsonEncode({
+            'protocolVersion': 3,
+            'attendanceSessionId': 17,
+            'sessionId': 'expired-session',
+            'nonce': 'nonce',
+            'modelId': 'opencv_sface_2021dec_v1',
+            'expiresAt': DateTime.now()
+                .toUtc()
+                .add(const Duration(seconds: 5))
+                .toIso8601String(),
+            'livenessActions': ['blink', 'smile', 'turn'],
+          }),
+          201,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      final service = FaceAuthApiService(accessToken: 'token', client: client);
+      addTearDown(service.close);
+
+      await expectLater(
+        service.startMobileAttendanceSession(attendanceSessionId: 17),
+        throwsA(isA<FaceAuthApiException>()),
+      );
+    },
+  );
+
+  test(
+    'mobile completion always sends protocol 3 and liveness proof',
+    () async {
+      late Map<String, dynamic> submitted;
+      final client = MockClient((request) async {
+        submitted = jsonDecode(request.body) as Map<String, dynamic>;
+        return http.Response(
+          jsonEncode({'verified': true, 'similarity': .91}),
+          201,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+      final service = FaceAuthApiService(accessToken: 'token', client: client);
+      final ticket = MobileFaceSessionTicket(
+        protocolVersion: 3,
+        attendanceSessionId: 17,
+        sessionId: 'mobile-session-0001',
+        nonce: 'nonce-value-long-enough',
+        modelId: 'opencv_sface_2021dec_v1',
+        expiresAt: DateTime.utc(2026, 9, 23, 1),
+        livenessActions: ['blink', 'turn', 'smile'],
+      );
+      const proof = MobileLivenessProof(
+        actions: ['blink', 'turn', 'smile'],
+        completedAt: '2026-09-23T00:10:00.000Z',
+        frameCount: 14,
+        blinkPeak: .7,
+        smilePeak: .6,
+        turnPeak: .4,
+        neutralBlinkMax: .1,
+        neutralSmileMax: .1,
+        neutralTurnMax: .08,
+      );
+
+      await service.completeMobileAttendanceSession(
+        ticket: ticket,
+        embedding: List<double>.filled(128, 0),
+        publicKey: 'public-key',
+        signature: 'signature',
+        livenessProof: proof,
+      );
+
+      expect(submitted['protocolVersion'], 3);
+      expect(submitted['livenessProof'], proof.toJson());
+    },
+  );
+
   test('parses a face session ticket returned by NestJS', () {
     final ticket = FaceSessionTicket.fromJson({
       'attendanceSessionId': 42,

@@ -13,11 +13,26 @@ import type {
 } from '../attendance/attendance.domain';
 import { decideAttendance } from '../attendance/attendance-decision.engine';
 import { BleTestConfig } from '../attendance/ble-test.config';
+import { verifyBleC6Token } from '../attendance/ble-c6-verifier';
+import {
+  parseSchoolDate,
+  schoolAddDays,
+  schoolDateFromParts,
+  schoolDateKey,
+  schoolDateParts,
+  schoolIsoDay,
+  schoolStartOfDay,
+  schoolWithTime,
+} from '../schedules/business-time';
 import {
   isDateWithinScheduleBounds,
   resolveScheduleOccurrenceDates,
 } from '../schedules/schedule-recurrence';
 import { FaceAuthService } from './face-auth.service';
+import {
+  type MobileLivenessProof,
+  MobileFaceAuthService,
+} from './mobile-face-auth.service';
 
 type StudentQuery = {
   schoolCode?: string;
@@ -40,6 +55,7 @@ type AttendanceScanBody = StudentQuery &
     faceSessionId?: string;
     faceSessionToken?: string;
     faceShard?: string;
+    mobileFaceSessionId?: string;
   };
 
 type StudentRecord = NonNullable<
@@ -75,9 +91,12 @@ type DerivedHistoryStatus = {
 
 @Injectable()
 export class StudentsService {
+  private readonly requireBle = process.env.ATTENDANCE_REQUIRE_BLE !== 'false';
+
   constructor(
     private readonly prismaTenant: PrismaTenantService,
     private readonly faceAuth: FaceAuthService,
+    private readonly mobileFaceAuth: MobileFaceAuthService,
   ) {}
 
   async getStudentHome(query: StudentQuery) {
@@ -143,7 +162,12 @@ export class StudentsService {
           icon: 'logout',
         },
       ],
-      todaySchedules: schedulePayload.items,
+      // The home card uses the first item. An expired earlier class must not
+      // hide another class whose attendance window is open right now.
+      todaySchedules: [
+        ...schedulePayload.items.filter((item) => item.canAttend),
+        ...schedulePayload.items.filter((item) => !item.canAttend),
+      ],
       recentHistory: historyPayload.items.slice(0, 3),
       notifications: notificationsPayload.items.slice(0, 3),
     };
@@ -218,6 +242,144 @@ export class StudentsService {
     };
   }
 
+  async startMobileAttendanceFaceSession(body: AttendanceScanBody) {
+    const context = await this.getStudentContext(body);
+    const sessionId = Number(body.sessionId);
+    if (!Number.isFinite(sessionId) || sessionId <= 0) {
+      throw new BadRequestException('Mã phiên điểm danh không hợp lệ');
+    }
+    const offeringAccess = await this.getStudentOfferingAccess(context);
+    const session = await context.prisma.attendanceSession.findFirst({
+      where: {
+        id: sessionId,
+        schedule: this.buildStudentScheduleWhere(context, offeringAccess, true),
+      },
+      include: {
+        records: { where: { studentId: context.student.id }, take: 1 },
+      },
+    });
+    if (!session)
+      throw new NotFoundException('Không tìm thấy buổi học điểm danh');
+    const now = new Date();
+    const openedAt = session.openedAt ? new Date(session.openedAt) : null;
+    const closesAt = session.closesAt ? new Date(session.closesAt) : null;
+    if (openedAt && openedAt.getTime() > now.getTime()) {
+      throw new BadRequestException('Buổi học này chưa mở điểm danh');
+    }
+    if (
+      session.status !== 'open' ||
+      (closesAt && closesAt.getTime() < now.getTime())
+    ) {
+      throw new BadRequestException('Buổi học này không còn mở điểm danh');
+    }
+    if (session.records[0]?.scanResult === 'success') {
+      throw new BadRequestException('Sinh viên đã điểm danh trong phiên này');
+    }
+    const identityKey = context.student.faceIdentityKey?.trim();
+    if (!identityKey) {
+      throw new BadRequestException(
+        'Tài khoản sinh viên chưa được liên kết khuôn mặt',
+      );
+    }
+    const ticket = await this.mobileFaceAuth.start(
+      this.mobileIdentityKey(context, identityKey),
+      session.id,
+    );
+    return { attendanceSessionId: session.id, ...ticket };
+  }
+
+  async completeMobileAttendanceFaceSession(
+    body: StudentQuery & {
+      sessionId: string;
+      nonce: string;
+      embedding: number[];
+      publicKey: string;
+      signature: string;
+      livenessProof: MobileLivenessProof;
+    },
+  ) {
+    const context = await this.getStudentContext(body);
+    const identityKey = context.student.faceIdentityKey?.trim();
+    if (!identityKey) {
+      throw new BadRequestException(
+        'Tài khoản sinh viên chưa được liên kết khuôn mặt',
+      );
+    }
+    return this.mobileFaceAuth.complete({
+      ...body,
+      expectedIdentityKey: this.mobileIdentityKey(context, identityKey),
+    });
+  }
+
+  async enrollMobileFace(
+    body: StudentQuery & {
+      faceSessionId: string;
+      faceSessionToken: string;
+      faceShard: string;
+      publicKey: string;
+      embeddings: number[][];
+    },
+  ) {
+    const context = await this.getStudentContext(body);
+    const identityKey = context.student.faceIdentityKey?.trim();
+    if (!identityKey) {
+      throw new BadRequestException(
+        'Tài khoản sinh viên chưa được liên kết khuôn mặt',
+      );
+    }
+    const verification = await this.faceAuth.getSession(
+      body.faceShard,
+      body.faceSessionId,
+      body.faceSessionToken,
+    );
+    const recognizedIdentity =
+      verification.recognition?.best_match_name?.trim();
+    const trusted =
+      verification.stage === 'SUCCESS' &&
+      verification.final?.ok === true &&
+      verification.recognition?.is_recognized === true &&
+      recognizedIdentity === identityKey;
+    if (!trusted) {
+      throw new BadRequestException(
+        'Cần hoàn tất xác minh khuôn mặt hiện có trước khi đăng ký điện thoại',
+      );
+    }
+    const enrolled = await this.mobileFaceAuth.enrollTrusted({
+      identityKey: this.mobileIdentityKey(context, identityKey),
+      embeddings: body.embeddings,
+      publicKey: body.publicKey,
+    });
+    await this.faceAuth.deleteSession(
+      body.faceShard,
+      body.faceSessionId,
+      body.faceSessionToken,
+    );
+    return enrolled;
+  }
+
+  async listMobileFaceDevices(query: StudentQuery) {
+    const context = await this.getStudentContext(query);
+    const identityKey = context.student.faceIdentityKey?.trim();
+    if (!identityKey) return [];
+    return this.mobileFaceAuth.listDevices(
+      this.mobileIdentityKey(context, identityKey),
+    );
+  }
+
+  async revokeMobileFaceDevice(query: StudentQuery, keyFingerprint: string) {
+    const context = await this.getStudentContext(query);
+    const identityKey = context.student.faceIdentityKey?.trim();
+    if (!identityKey) {
+      throw new BadRequestException(
+        'Tài khoản sinh viên chưa được liên kết khuôn mặt',
+      );
+    }
+    return this.mobileFaceAuth.revokeDevice(
+      this.mobileIdentityKey(context, identityKey),
+      keyFingerprint,
+    );
+  }
+
   async scanAttendance(body: AttendanceScanBody) {
     const context = await this.getStudentContext(body);
     const sessionId = Number(body.sessionId);
@@ -275,10 +437,17 @@ export class StudentsService {
       );
     }
 
-    const faceSessionId = body.faceSessionId?.trim();
+    const mobileFaceSessionId = body.mobileFaceSessionId?.trim();
+    const usingMobileFace = Boolean(mobileFaceSessionId);
+    const faceSessionId = usingMobileFace
+      ? `mobile:${mobileFaceSessionId}`
+      : body.faceSessionId?.trim();
     const faceSessionToken = body.faceSessionToken?.trim();
     const faceShard = body.faceShard?.trim();
-    if (!faceSessionId || !faceSessionToken || !faceShard) {
+    if (
+      !faceSessionId ||
+      (!usingMobileFace && (!faceSessionToken || !faceShard))
+    ) {
       throw new BadRequestException('Thiếu kết quả xác minh khuôn mặt');
     }
 
@@ -297,14 +466,30 @@ export class StudentsService {
     }
 
     const expectedBle = BleTestConfig.fromSession(session);
-    const bleFailure = BleTestConfig.validate(
-      body.bleEvidence,
-      expectedBle,
-      session,
-    );
+    const bleFailure = this.requireBle
+      ? BleTestConfig.validate(body.bleEvidence, expectedBle, session)
+      : null;
+    if (!bleFailure && body.bleEvidence?.c6Token) {
+      const beacon = verifyBleC6Token(body.bleEvidence.c6Token);
+      if (beacon) {
+        body.bleEvidence = {
+          ...body.bleEvidence,
+          beaconId: beacon.beaconId,
+          roomId: beacon.roomId,
+        };
+      }
+    }
+    const gpsCapturedAt = this.parseOptionalDate(body.gpsEvidence?.capturedAt);
+    const gpsIsFresh =
+      gpsCapturedAt !== null &&
+      Math.abs(now.getTime() - gpsCapturedAt.getTime()) <= 2 * 60 * 1000 &&
+      typeof body.gpsEvidence?.accuracyMeters === 'number' &&
+      body.gpsEvidence.accuracyMeters <= 100;
     const evidenceFailure: AttendanceFailureReason | null =
       bleFailure ??
-      (body.faceEvidence?.verified === true ? null : 'INVALID_EVIDENCE');
+      (body.faceEvidence?.verified === true && gpsIsFresh
+        ? null
+        : 'INVALID_EVIDENCE');
     if (evidenceFailure) {
       const nextAttempts = (currentRecord?.scanAttempts ?? 0) + 1;
       const flaggedData = this.buildFlaggedRecordData(
@@ -318,18 +503,20 @@ export class StudentsService {
         flaggedData,
       );
 
-      await this.faceAuth.deleteSession(
-        faceShard,
-        faceSessionId,
-        faceSessionToken,
-      );
+      if (!usingMobileFace) {
+        await this.faceAuth.deleteSession(
+          faceShard!,
+          faceSessionId,
+          faceSessionToken!,
+        );
+      }
 
       if (saveResult.duplicate) {
         return this.buildAttendanceDecision(
           'rejected_duplicate',
           null,
           now,
-          'Sinh viÃªn Ä‘Ã£ Ä‘iá»ƒm danh trong phiÃªn nÃ y',
+          'Sinh viên đã điểm danh trong phiên này',
           false,
         );
       }
@@ -372,30 +559,45 @@ export class StudentsService {
       );
     }
 
-    const faceResult = await this.faceAuth.getSession(
-      faceShard,
-      faceSessionId,
-      faceSessionToken,
-    );
-    if (!['SUCCESS', 'FAILED'].includes(faceResult.stage)) {
-      throw new BadRequestException('Phiên xác minh khuôn mặt chưa hoàn tất');
-    }
-
-    const recognizedIdentity =
-      faceResult.recognition?.best_match_name?.trim() ?? '';
-    const outcome =
-      faceResult.stage === 'SUCCESS' &&
-      faceResult.final?.ok === true &&
-      faceResult.recognition?.is_recognized === true &&
-      recognizedIdentity === expectedIdentity
-        ? 'success'
-        : 'failure';
-    const similarity =
-      typeof faceResult.recognition?.similarity === 'number'
-        ? faceResult.recognition.similarity
-        : typeof faceResult.recognition?.similarity_percent === 'number'
-          ? faceResult.recognition.similarity_percent / 100
+    let recognizedIdentity = expectedIdentity;
+    let outcome: 'success' | 'failure' = 'failure';
+    let similarity: number | null = null;
+    if (usingMobileFace) {
+      await this.mobileFaceAuth.getVerified(
+        mobileFaceSessionId!,
+        this.mobileIdentityKey(context, expectedIdentity),
+        session.id,
+      );
+      outcome = 'success';
+      similarity =
+        typeof body.faceEvidence?.score === 'number'
+          ? body.faceEvidence.score
           : null;
+    } else {
+      const faceResult = await this.faceAuth.getSession(
+        faceShard!,
+        faceSessionId,
+        faceSessionToken!,
+      );
+      if (!['SUCCESS', 'FAILED'].includes(faceResult.stage)) {
+        throw new BadRequestException('Phiên xác minh khuôn mặt chưa hoàn tất');
+      }
+      recognizedIdentity =
+        faceResult.recognition?.best_match_name?.trim() ?? '';
+      outcome =
+        faceResult.stage === 'SUCCESS' &&
+        faceResult.final?.ok === true &&
+        faceResult.recognition?.is_recognized === true &&
+        recognizedIdentity === expectedIdentity
+          ? 'success'
+          : 'failure';
+      similarity =
+        typeof faceResult.recognition?.similarity === 'number'
+          ? faceResult.recognition.similarity
+          : typeof faceResult.recognition?.similarity_percent === 'number'
+            ? faceResult.recognition.similarity_percent / 100
+            : null;
+    }
 
     const nextAttempts = (currentRecord?.scanAttempts ?? 0) + 1;
     const sessionStart = new Date(session.attendanceDate);
@@ -442,18 +644,20 @@ export class StudentsService {
       recordData,
     );
 
-    await this.faceAuth.deleteSession(
-      faceShard,
-      faceSessionId,
-      faceSessionToken,
-    );
+    if (!usingMobileFace) {
+      await this.faceAuth.deleteSession(
+        faceShard!,
+        faceSessionId,
+        faceSessionToken!,
+      );
+    }
 
     if (saveResult.duplicate) {
       return this.buildAttendanceDecision(
         'rejected_duplicate',
         null,
         now,
-        'Sinh viÃªn Ä‘Ã£ Ä‘iá»ƒm danh trong phiÃªn nÃ y',
+        'Sinh viên đã điểm danh trong phiên này',
         false,
       );
     }
@@ -967,9 +1171,12 @@ export class StudentsService {
   }
 
   private buildEvidenceJson(body: AttendanceScanBody) {
+    const bleEvidence = body.bleEvidence ? { ...body.bleEvidence } : null;
+    // Keep the authenticated room metadata, not a reusable radio token.
+    if (bleEvidence) delete bleEvidence.c6Token;
     return JSON.parse(
       JSON.stringify({
-        bleEvidence: body.bleEvidence ?? null,
+        bleEvidence,
         faceEvidence: body.faceEvidence ?? null,
         gpsEvidence: body.gpsEvidence ?? null,
       }),
@@ -1031,7 +1238,18 @@ export class StudentsService {
       };
     }
 
-    if (session.status === 'open') {
+    const now = Date.now();
+    const openedAt = session.openedAt
+      ? new Date(session.openedAt).getTime()
+      : null;
+    const closesAt = session.closesAt
+      ? new Date(session.closesAt).getTime()
+      : null;
+    if (
+      session.status === 'open' &&
+      (!openedAt || openedAt <= now) &&
+      (!closesAt || closesAt >= now)
+    ) {
       return {
         code: 'open',
         label: 'Đang mở điểm danh',
@@ -1225,6 +1443,10 @@ export class StudentsService {
     };
   }
 
+  private mobileIdentityKey(context: StudentContext, identityKey: string) {
+    return `${context.student.school.code.trim().toUpperCase()}:${identityKey}`;
+  }
+
   private findStudent(prisma: PrismaClient, schoolCode: string, mssv: string) {
     return prisma.student.findFirst({
       where: {
@@ -1250,7 +1472,7 @@ export class StudentsService {
       return this.startOfDay(new Date());
     }
 
-    const parsed = new Date(dateValue);
+    const parsed = parseSchoolDate(dateValue);
     if (Number.isNaN(parsed.getTime())) {
       throw new BadRequestException('Ngày không hợp lệ');
     }
@@ -1265,44 +1487,33 @@ export class StudentsService {
     if (view === 'day') {
       return {
         start: anchorDate,
-        endExclusive: new Date(anchorDate.getTime() + 24 * 60 * 60 * 1000),
+        endExclusive: schoolAddDays(anchorDate, 1),
       };
     }
 
     if (view === 'week') {
       const isoDay = this.getIsoDay(anchorDate);
-      const weekStart = new Date(anchorDate);
-      weekStart.setDate(weekStart.getDate() - (isoDay - 1));
-      weekStart.setHours(0, 0, 0, 0);
+      const weekStart = schoolAddDays(anchorDate, -(isoDay - 1));
 
       return {
         start: weekStart,
-        endExclusive: new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000),
+        endExclusive: schoolAddDays(weekStart, 7),
       };
     }
 
-    const monthStart = new Date(
-      anchorDate.getFullYear(),
-      anchorDate.getMonth(),
-      1,
-    );
-    monthStart.setHours(0, 0, 0, 0);
+    const { year, month } = schoolDateParts(anchorDate);
+    const monthStart = schoolDateFromParts({ year, month, day: 1 });
+    const nextMonth =
+      month === 12 ? { year: year + 1, month: 1 } : { year, month: month + 1 };
 
     return {
       start: monthStart,
-      endExclusive: new Date(
-        monthStart.getFullYear(),
-        monthStart.getMonth() + 1,
-        1,
-      ),
+      endExclusive: schoolDateFromParts({ ...nextMonth, day: 1 }),
     };
   }
 
   private combineDateAndTime(source: Date, timeValue: string) {
-    const [hours, minutes] = timeValue.split(':').map((value) => Number(value));
-    const result = new Date(source);
-    result.setHours(hours || 0, minutes || 0, 0, 0);
-    return result;
+    return schoolWithTime(source, timeValue);
   }
 
   private buildSessionKey(scheduleId: number, dateValue: Date) {
@@ -1310,10 +1521,7 @@ export class StudentsService {
   }
 
   private formatDateKey(value: Date) {
-    const year = `${value.getFullYear()}`;
-    const month = `${value.getMonth() + 1}`.padStart(2, '0');
-    const day = `${value.getDate()}`.padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return schoolDateKey(value);
   }
 
   private normalizeRoomName(room: string) {
@@ -1328,19 +1536,14 @@ export class StudentsService {
   }
 
   private getIsoDay(value: Date) {
-    const day = value.getDay();
-    return day === 0 ? 7 : day;
+    return schoolIsoDay(value);
   }
 
   private startOfDay(value: Date) {
-    const result = new Date(value);
-    result.setHours(0, 0, 0, 0);
-    return result;
+    return schoolStartOfDay(value);
   }
 
   private endOfDay(value: Date) {
-    const result = this.startOfDay(value);
-    result.setDate(result.getDate() + 1);
-    return result;
+    return schoolAddDays(this.startOfDay(value), 1);
   }
 }

@@ -4,6 +4,7 @@ import contextlib
 from dataclasses import asdict, is_dataclass
 from datetime import datetime
 import logging
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 import time
 from typing import Any, Iterator
@@ -67,7 +68,13 @@ def setup_logging(config: dict[str, Any], name: str = "face_auth") -> logging.Lo
     logger.addHandler(stream_handler)
 
     log_dir = resolve_demo_path(config, "log_path", "logs")
-    file_handler = logging.FileHandler(log_dir / "face_auth.log", encoding="utf-8")
+    # At most 20 MiB per process with defaults, including the active file.
+    # Docker's stdout rotation does not cover this optional local log file.
+    file_handler = RotatingFileHandler(
+        log_dir / "face_auth.log", encoding="utf-8",
+        maxBytes=max(1024, int(get_nested(config, "logging.max_bytes", 5 * 1024 * 1024))),
+        backupCount=max(1, int(get_nested(config, "logging.backup_count", 3))),
+    )
     file_handler.setFormatter(formatter)
     logger.addHandler(file_handler)
     return logger

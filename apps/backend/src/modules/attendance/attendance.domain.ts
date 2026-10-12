@@ -26,6 +26,8 @@ export type BleEvidence = {
   rssi?: number;
   scannedAt?: string;
   scanDurationMs?: number;
+  isMock?: boolean;
+  c6Token?: string;
 };
 
 export type FaceEvidence = {
@@ -61,4 +63,5 @@ export type BleSessionExpectation = {
   deviceName: string;
   serviceUuid: string;
   minRssi: number;
+  deviceIds?: string[];
 };

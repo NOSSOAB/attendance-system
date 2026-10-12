@@ -489,7 +489,16 @@ class PipelineTests(unittest.TestCase):
 
             with session.lock:
                 session.engine.passed = True
+            # A passing early check is only provisional. The final frontal frame
+            # is deliberately verified in a separate background job together
+            # with the liveness evidence, so no identity can be swapped during
+            # a challenge.
             final = pipeline.process_frame(session_id, jpeg_bytes(value=129), False, -1)
+            self.assertEqual("VERIFYING", final["stage"])
+            deadline = time.monotonic() + 1.0
+            while final["stage"] == "VERIFYING" and time.monotonic() < deadline:
+                time.sleep(0.01)
+                final = pipeline.get_status(session_id)
             self.assertEqual("SUCCESS", final["stage"])
         finally:
             pipeline.close()

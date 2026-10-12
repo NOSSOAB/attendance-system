@@ -5,7 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../../core/api/lecturer_api_service.dart';
+import '../../core/api/attendance_changes.dart';
 import '../../shared/models/auth_session_model.dart';
+import '../../core/auth/auth_session_controller.dart';
 import '../../shared/models/school_model.dart';
 import '../../shared/navigation/app_page_route.dart';
 import '../../shared/storage/auth_persistence_service.dart';
@@ -71,6 +73,10 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen> {
   @override
   void initState() {
     super.initState();
+    AuthSessionController.instance.activate(
+      widget.session,
+      widget.selectedSchool,
+    );
     _lecturerApiService = LecturerApiService(
       accessToken: widget.session.accessToken,
     );
@@ -203,6 +209,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen> {
   }
 
   Future<void> _logout() async {
+    AuthSessionController.instance.clear();
     await _authPersistenceService.clearSavedSessionKeepingContext(
       school: widget.selectedSchool,
       role: widget.session.role,
@@ -1513,7 +1520,9 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen> {
         ),
         const SizedBox(height: 12),
         _buildInfoCard(
-          title: 'Phiên điểm danh hiện tại',
+          title: isSessionOpen
+              ? 'Phiên điểm danh đang mở'
+              : 'Phiên điểm danh gần nhất',
           rows: [
             _InfoRow(
               'Ngày điểm danh',
@@ -1907,21 +1916,13 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen> {
     }
 
     final students = _listMap(_classDetail?['students']);
-    final records = students.map((student) {
-      final draft = _attendanceViewFor(student);
-      final payload = <String, dynamic>{
-        'recordId': student['recordId'],
-        'studentId': _intValue(student['studentId']),
-        'status': draft.statusCode,
-        'note': draft.note,
-      };
-
-      if (draft.checkInAt != null) {
-        payload['checkInAt'] = draft.checkInAt!.toIso8601String();
-      }
-
-      return payload;
-    }).toList();
+    final records = buildAttendanceChanges(
+      students: students,
+      edits: _attendanceDrafts.map(
+        (id, draft) =>
+            MapEntry(id, {'status': draft.statusCode, 'note': draft.note}),
+      ),
+    );
 
     try {
       setState(() {
@@ -3018,6 +3019,7 @@ class _LecturerHomeScreenState extends State<LecturerHomeScreen> {
                       ),
                     ),
                   ),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       row.value,

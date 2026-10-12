@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'user_role.dart';
 
 class AuthSessionModel {
@@ -6,6 +8,7 @@ class AuthSessionModel {
   final String accessToken;
   final String tokenType;
   final int expiresInSeconds;
+  final DateTime? expiresAt;
   final AuthUserProfileModel user;
 
   const AuthSessionModel({
@@ -14,16 +17,22 @@ class AuthSessionModel {
     required this.accessToken,
     required this.tokenType,
     required this.expiresInSeconds,
+    this.expiresAt,
     required this.user,
   });
 
   factory AuthSessionModel.fromJson(Map<String, dynamic> json) {
+    final token = json['accessToken'] as String? ?? '';
+    final ttl = (json['expiresInSeconds'] as num?)?.toInt() ?? 0;
     return AuthSessionModel(
       message: json['message'] as String? ?? 'Đăng nhập thành công',
       role: userRoleFromValue(json['role'] as String?),
-      accessToken: json['accessToken'] as String? ?? '',
+      accessToken: token,
       tokenType: json['tokenType'] as String? ?? 'Bearer',
-      expiresInSeconds: (json['expiresInSeconds'] as num?)?.toInt() ?? 0,
+      expiresInSeconds: ttl,
+      expiresAt:
+          resolveExpiry(token, json['expiresAt']) ??
+          (ttl > 0 ? DateTime.now().toUtc().add(Duration(seconds: ttl)) : null),
       user: AuthUserProfileModel.fromJson(json['user'] as Map<String, dynamic>),
     );
   }
@@ -35,8 +44,45 @@ class AuthSessionModel {
       'accessToken': accessToken,
       'tokenType': tokenType,
       'expiresInSeconds': expiresInSeconds,
+      'expiresAt': expiresAt?.toUtc().toIso8601String(),
       'user': user.toJson(),
     };
+  }
+
+  DateTime? get effectiveExpiresAt =>
+      resolveExpiry(accessToken, expiresAt?.toIso8601String());
+
+  bool get isExpired =>
+      effectiveExpiresAt == null ||
+      !effectiveExpiresAt!.isAfter(DateTime.now().toUtc());
+
+  // JWT decoding is only a local expiry hint; the server verifies the signature.
+  // Never renew a restored session from a relative TTL saved at login time.
+  static DateTime? resolveExpiry(String token, Object? storedExpiry) {
+    final persisted = storedExpiry is String
+        ? DateTime.tryParse(storedExpiry)?.toUtc()
+        : null;
+    DateTime? jwtExpiry;
+    try {
+      final segments = token.split('.');
+      if (segments.length == 3) {
+        final payload = jsonDecode(
+          utf8.decode(base64Url.decode(base64Url.normalize(segments[1]))),
+        );
+        final exp = payload is Map<String, dynamic> ? payload['exp'] : null;
+        if (exp is num && exp.isFinite && exp > 0) {
+          jwtExpiry = DateTime.fromMillisecondsSinceEpoch(
+            (exp * 1000).toInt(),
+            isUtc: true,
+          );
+        }
+      }
+    } catch (_) {
+      // Missing or malformed expiry requires login again when no absolute expiry exists.
+    }
+    if (persisted == null) return jwtExpiry;
+    if (jwtExpiry == null) return persisted;
+    return persisted.isBefore(jwtExpiry) ? persisted : jwtExpiry;
   }
 }
 

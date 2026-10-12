@@ -16,6 +16,7 @@ class StudentHomeDashboard extends StatelessWidget {
     required this.unreadAnnouncementCount,
     required this.isLoading,
     required this.errorMessage,
+    required this.showRoomSignal,
     required this.isNearbyRoomScanning,
     required this.nearbyRoomEvidence,
     required this.nearbyRoomError,
@@ -50,6 +51,7 @@ class StudentHomeDashboard extends StatelessWidget {
   final int unreadAnnouncementCount;
   final bool isLoading;
   final String? errorMessage;
+  final bool showRoomSignal;
   final bool isNearbyRoomScanning;
   final BleEvidence? nearbyRoomEvidence;
   final String? nearbyRoomError;
@@ -115,8 +117,10 @@ class StudentHomeDashboard extends StatelessWidget {
                     )
                   else ...[
                     _buildFocusCard(focusSchedule),
-                    const SizedBox(height: 12),
-                    _buildRoomSignal(),
+                    if (showRoomSignal) ...[
+                      const SizedBox(height: 12),
+                      _buildRoomSignal(),
+                    ],
                     const SizedBox(height: 18),
                     _buildSnapshot(),
                     const SizedBox(height: 24),
@@ -548,7 +552,9 @@ class StudentHomeDashboard extends StatelessWidget {
     final title = isNearbyRoomScanning
         ? 'Đang tìm tín hiệu phòng học...'
         : hasRoom
-        ? 'Bạn đang gần phòng ${evidence.roomId}'
+        ? evidence.c6Token != null
+            ? 'Đã tìm thấy thiết bị điểm danh gần đây'
+            : 'Bạn đang gần phòng ${evidence.roomId}'
         : 'Chưa phát hiện phòng học gần bạn';
     final detail = isNearbyRoomScanning
         ? 'Quá trình quét thường mất vài giây'

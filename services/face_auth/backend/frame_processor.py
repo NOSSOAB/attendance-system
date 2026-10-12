@@ -114,6 +114,7 @@ class FrameProcessor:
         face = detection.primary_face
         return bool(
             face
+            and detection.face_count == 1
             and face.checks.get("detected")
             and self.dominant_face_ok(detection)
             and face.checks.get("face_size")
@@ -192,6 +193,35 @@ class FrameProcessor:
             session.verification_samples.pop(0)
         session.last_sample_at = captured_at
         session.best_frame_quality = max(session.best_frame_quality, quality)
+        return True
+
+    def remember_identity_sample(
+        self,
+        session: AuthSession,
+        frame: np.ndarray,
+        detection: FaceDetectionResult,
+        challenge_index: int,
+        role: str,
+    ) -> bool:
+        """Pin liveness evidence independently of quality ranking and sampling cadence."""
+        face = detection.primary_face
+        quality = score_recognition_frame(detection, self.settings.final_pose_limit)
+        if face is None or quality < 0:
+            return False
+        ok, encoded = cv2.imencode(
+            ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), self.settings.sample_jpeg_quality]
+        )
+        if not ok:
+            return False
+        session.identity_samples[(challenge_index, role)] = VerificationFrameSample(
+            jpeg_bytes=encoded.tobytes(),
+            bbox=face.bbox,
+            quality=quality,
+            captured_at=time.monotonic(),
+            challenge_index=challenge_index,
+            recognition_keypoints=_insightface_keypoints(face.landmarks_px),
+            identity_role=role,
+        )
         return True
 
     @staticmethod

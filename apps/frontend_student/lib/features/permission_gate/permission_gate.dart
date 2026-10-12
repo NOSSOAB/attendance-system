@@ -38,6 +38,10 @@ abstract class PermissionGateController {
 }
 
 class DevicePermissionGateController implements PermissionGateController {
+  final bool requireBluetooth;
+
+  const DevicePermissionGateController({this.requireBluetooth = true});
+
   @override
   Future<PermissionGateSnapshot> check() async {
     final platform = defaultTargetPlatform;
@@ -47,19 +51,21 @@ class DevicePermissionGateController implements PermissionGateController {
       return const PermissionGateSnapshot(PermissionGateState.ready);
     }
 
-    final bluetoothPermissions = platform == TargetPlatform.android
-        ? [Permission.bluetoothScan, Permission.bluetoothConnect]
-        : [Permission.bluetooth];
-    final bluetoothStatuses = await Future.wait(
-      bluetoothPermissions.map((permission) => permission.status),
-    );
-    if (bluetoothStatuses.any((status) => !status.isGranted)) {
-      return PermissionGateSnapshot(
-        PermissionGateState.bluetoothPermissionRequired,
-        permanentlyDenied: bluetoothStatuses.any(
-          (status) => status.isPermanentlyDenied,
-        ),
+    if (requireBluetooth) {
+      final bluetoothPermissions = platform == TargetPlatform.android
+          ? [Permission.bluetoothScan, Permission.bluetoothConnect]
+          : [Permission.bluetooth];
+      final bluetoothStatuses = await Future.wait(
+        bluetoothPermissions.map((permission) => permission.status),
       );
+      if (bluetoothStatuses.any((status) => !status.isGranted)) {
+        return PermissionGateSnapshot(
+          PermissionGateState.bluetoothPermissionRequired,
+          permanentlyDenied: bluetoothStatuses.any(
+            (status) => status.isPermanentlyDenied,
+          ),
+        );
+      }
     }
 
     final locationStatus = await Permission.locationWhenInUse.status;
@@ -70,14 +76,16 @@ class DevicePermissionGateController implements PermissionGateController {
       );
     }
 
-    final adapterState = await FlutterBluePlus.adapterState.first.timeout(
-      const Duration(seconds: 4),
-      onTimeout: () => BluetoothAdapterState.unknown,
-    );
-    if (adapterState != BluetoothAdapterState.on) {
-      return const PermissionGateSnapshot(
-        PermissionGateState.bluetoothDisabled,
+    if (requireBluetooth) {
+      final adapterState = await FlutterBluePlus.adapterState.first.timeout(
+        const Duration(seconds: 4),
+        onTimeout: () => BluetoothAdapterState.unknown,
       );
+      if (adapterState != BluetoothAdapterState.on) {
+        return const PermissionGateSnapshot(
+          PermissionGateState.bluetoothDisabled,
+        );
+      }
     }
 
     final locationService = await Permission.locationWhenInUse.serviceStatus;
@@ -92,13 +100,15 @@ class DevicePermissionGateController implements PermissionGateController {
 
   @override
   Future<void> requestPermissions() async {
-    final permissions = defaultTargetPlatform == TargetPlatform.android
-        ? [
-            Permission.bluetoothScan,
-            Permission.bluetoothConnect,
-            Permission.locationWhenInUse,
-          ]
-        : [Permission.bluetooth, Permission.locationWhenInUse];
+    final permissions = requireBluetooth
+        ? defaultTargetPlatform == TargetPlatform.android
+              ? [
+                  Permission.bluetoothScan,
+                  Permission.bluetoothConnect,
+                  Permission.locationWhenInUse,
+                ]
+              : [Permission.bluetooth, Permission.locationWhenInUse]
+        : [Permission.locationWhenInUse];
     await permissions.request();
   }
 
@@ -122,8 +132,14 @@ class DevicePermissionGateController implements PermissionGateController {
 class PermissionGate extends StatefulWidget {
   final Widget child;
   final PermissionGateController? controller;
+  final bool requireBluetooth;
 
-  const PermissionGate({super.key, required this.child, this.controller});
+  const PermissionGate({
+    super.key,
+    required this.child,
+    this.controller,
+    this.requireBluetooth = true,
+  });
 
   @override
   State<PermissionGate> createState() => _PermissionGateState();
@@ -141,7 +157,11 @@ class _PermissionGateState extends State<PermissionGate>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _controller = widget.controller ?? DevicePermissionGateController();
+    _controller =
+        widget.controller ??
+        DevicePermissionGateController(
+          requireBluetooth: widget.requireBluetooth,
+        );
     unawaited(_refresh());
   }
 
@@ -284,8 +304,9 @@ class _PermissionGateState extends State<PermissionGate>
         return _GateContent(
           icon: Icons.location_on_outlined,
           title: 'Cho phép sử dụng vị trí',
-          description:
-              'Quyền vị trí được yêu cầu trước khi ứng dụng thực hiện quét BLE.',
+          description: widget.requireBluetooth
+              ? 'Quyền vị trí được yêu cầu trước khi ứng dụng thực hiện quét BLE.'
+              : 'Ứng dụng cần quyền vị trí để kiểm tra điều kiện điểm danh.',
           primaryLabel: _snapshot.permanentlyDenied
               ? 'Mở cài đặt'
               : 'Cấp quyền vị trí',
@@ -313,7 +334,9 @@ class _PermissionGateState extends State<PermissionGate>
         return _GateContent(
           icon: Icons.error_outline_rounded,
           title: 'Không kiểm tra được quyền',
-          description: 'Đã có lỗi khi kiểm tra Bluetooth và vị trí.',
+          description: widget.requireBluetooth
+              ? 'Đã có lỗi khi kiểm tra Bluetooth và vị trí.'
+              : 'Đã có lỗi khi kiểm tra vị trí.',
           primaryLabel: 'Thử lại',
           primaryAction: _refresh,
         );

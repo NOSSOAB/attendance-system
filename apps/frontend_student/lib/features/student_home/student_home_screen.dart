@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../core/api/face_auth_api_service.dart';
@@ -9,12 +10,14 @@ import '../../core/ble/ble_models.dart';
 import '../../core/ble/ble_scanner.dart';
 import '../../core/location/gps_evidence_collector.dart';
 import '../../shared/models/auth_session_model.dart';
+import '../../core/auth/auth_session_controller.dart';
 import '../../shared/models/school_model.dart';
 import '../../shared/models/student_home_model.dart';
 import '../../shared/navigation/app_page_route.dart';
 import '../../shared/storage/auth_persistence_service.dart';
 import '../auth/login_screen.dart';
 import '../face_verification/face_verification_screen.dart';
+import '../face_verification/mobile_face_verification_screen.dart';
 import 'widgets/student_home_dashboard.dart';
 
 enum _ScheduleViewMode { day, week, month }
@@ -34,6 +37,16 @@ class StudentHomeScreen extends StatefulWidget {
 }
 
 class _StudentHomeScreenState extends State<StudentHomeScreen> {
+  static const bool _mobileFaceEnabled = bool.fromEnvironment(
+    'MOBILE_FACE_AUTH',
+    defaultValue: !kDebugMode,
+  );
+  // Kept behind a build flag so face-auth can be validated independently
+  // without removing the BLE implementation.
+  static const bool _bleAttendanceEnabled = bool.fromEnvironment(
+    'BLE_ATTENDANCE_ENABLED',
+    defaultValue: true,
+  );
   static const Color _white = Colors.white;
   static const Color _pageBg = Color(0xFFF5F7FB);
   static const Color _cardBg = Color(0xFFFFFFFF);
@@ -72,6 +85,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   @override
   void initState() {
     super.initState();
+    AuthSessionController.instance.activate(
+      widget.session,
+      widget.selectedSchool,
+    );
     _scheduleAnchorDate = _normalizeDate(DateTime.now());
     _scheduleSelectedDate = _scheduleAnchorDate;
     _studentHomeApiService = StudentHomeApiService(
@@ -80,7 +97,9 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     _bleScanner = BleScannerFactory.create();
     _loadHomeData();
     _loadScheduleData();
-    unawaited(_scanNearbyRoom());
+    if (_bleAttendanceEnabled) {
+      unawaited(_scanNearbyRoom());
+    }
   }
 
   @override
@@ -104,7 +123,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       setState(() {
         _nearbyRoomEvidence = nearest;
         _nearbyRoomError = nearest == null
-            ? 'Không tìm thấy BLE thử nghiệm gần đây'
+            ? 'Không tìm thấy thiết bị điểm danh gần đây'
             : null;
       });
     } on BleScanCancelledException {
@@ -129,8 +148,13 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     final matching = results
         .where(
           (result) =>
-              result.beaconId == item.expectedBle.beaconId &&
-              result.roomId == item.expectedBle.roomId,
+              (result.c6Token != null &&
+                  (item.expectedBle.deviceIds.isEmpty ||
+                      item.expectedBle.deviceIds.contains(
+                        result.c6DeviceId,
+                      ))) ||
+              (result.beaconId == item.expectedBle.beaconId &&
+                  result.roomId == item.expectedBle.roomId),
         )
         .toList();
     final evidence = selectNearestBle(matching);
@@ -927,7 +951,11 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     return item != null && item.canAttend && (item.sessionId ?? 0) > 0;
   }
 
-  void _showSmallMessage(String message, {bool isError = false}) {
+  void _showSmallMessage(
+    String message, {
+    bool isError = false,
+    Duration duration = const Duration(seconds: 2),
+  }) {
     final normalizedMessage = _normalizeStudentUiMessage(message);
     final messenger = ScaffoldMessenger.of(context);
     messenger.hideCurrentSnackBar();
@@ -939,7 +967,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         ),
         behavior: SnackBarBehavior.floating,
         backgroundColor: isError ? const Color(0xFFB42318) : _textPrimary,
-        duration: const Duration(seconds: 2),
+        duration: duration,
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
       ),
@@ -981,6 +1009,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       _showSmallMessage('Hiện tại không có phiên điểm danh');
       return;
     }
+    final attendanceItem = item!;
 
     if (_isAttendanceSubmitting) {
       return;
@@ -991,49 +1020,86 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     });
 
     try {
-      _showSmallMessage('Đang quét BLE mới trong 5–8 giây...');
-      final bleEvidence = await _scanAttendanceBle(item!);
+      final BleEvidence? bleEvidence;
+      if (_bleAttendanceEnabled) {
+        _showSmallMessage('Đang quét BLE mới trong 5–8 giây...');
+        bleEvidence = await _scanAttendanceBle(attendanceItem);
+      } else {
+        bleEvidence = null;
+      }
       if (!mounted) return;
 
-      final verification = await Navigator.of(context)
-          .push<FaceVerificationResult>(
-            buildAppPageRoute<FaceVerificationResult>(
-              FaceVerificationScreen(
-                schoolCode: widget.selectedSchool.code,
-                mssv: widget.session.user.code,
-                accessToken: widget.session.accessToken,
-                attendanceSessionId: item.sessionId!,
-                courseCode: item.courseCode,
+      final Object? verification;
+      if (_mobileFaceEnabled) {
+        verification = await Navigator.of(context)
+            .push<MobileFaceVerificationResult>(
+              buildAppPageRoute<MobileFaceVerificationResult>(
+                MobileFaceVerificationScreen(
+                  accessToken: widget.session.accessToken,
+                  attendanceSessionId: attendanceItem.sessionId!,
+                  courseCode: attendanceItem.courseCode,
+                ),
               ),
+            );
+      } else {
+        verification = await Navigator.of(context).push<FaceVerificationResult>(
+          buildAppPageRoute<FaceVerificationResult>(
+            FaceVerificationScreen(
+              schoolCode: widget.selectedSchool.code,
+              mssv: widget.session.user.code,
+              accessToken: widget.session.accessToken,
+              attendanceSessionId: attendanceItem.sessionId!,
+              courseCode: attendanceItem.courseCode,
             ),
-          );
+          ),
+        );
+      }
 
       if (!mounted || verification == null) {
         return;
       }
 
-      _showSmallMessage('Đang ghi nhận vị trí GPS hiện tại...');
+      _showSmallMessage(
+        'Khuôn mặt đã xác minh. Đang kiểm tra vị trí và lưu điểm danh...',
+        duration: const Duration(seconds: 20),
+      );
       final gpsEvidence = await _gpsEvidenceCollector.captureCurrentPosition();
       if (!mounted) return;
 
       final result = await _studentHomeApiService.scanAttendance(
         schoolCode: widget.selectedSchool.code,
         mssv: widget.session.user.code,
-        sessionId: item.sessionId!,
-        faceSessionId: verification.faceSessionId,
-        faceSessionToken: verification.faceSessionToken,
-        faceShard: verification.faceShard,
+        sessionId: attendanceItem.sessionId!,
+        mobileFaceSessionId: verification is MobileFaceVerificationResult
+            ? verification.mobileFaceSessionId
+            : null,
+        faceSessionId: verification is FaceVerificationResult
+            ? verification.faceSessionId
+            : null,
+        faceSessionToken: verification is FaceVerificationResult
+            ? verification.faceSessionToken
+            : null,
+        faceShard: verification is FaceVerificationResult
+            ? verification.faceShard
+            : null,
         bleEvidence: bleEvidence,
-        faceScore: verification.similarityPercent == null
-            ? null
-            : verification.similarityPercent! / 100,
+        faceScore: verification is MobileFaceVerificationResult
+            ? verification.similarity
+            : verification is FaceVerificationResult &&
+                  verification.similarityPercent != null
+            ? verification.similarityPercent! / 100
+            : null,
         faceVerifiedAt: DateTime.now().toUtc(),
         gpsEvidence: gpsEvidence,
       );
 
       if (!mounted) return;
 
-      _showSmallMessage(result.message, isError: !result.isAccepted);
+      _showSmallMessage(
+        result.message,
+        isError: !result.isAccepted,
+        duration: const Duration(seconds: 5),
+      );
       await Future.wait<void>([_loadHomeData(), _loadScheduleData()]);
     } catch (error) {
       if (!mounted) return;
@@ -1041,6 +1107,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       _showSmallMessage(
         error.toString().replaceFirst('Exception: ', ''),
         isError: true,
+        duration: const Duration(seconds: 5),
       );
     } finally {
       if (mounted) {
@@ -1260,6 +1327,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                       ? _nearbyRoomError!
                       : evidence == null
                       ? 'Chưa có dữ liệu BLE'
+                      : evidence.c6Token != null
+                      ? 'Đã tìm thấy thiết bị điểm danh gần đây'
                       : 'Phòng gần nhất: ${evidence.roomId}',
                   style: _font(
                     size: 13,
@@ -1270,8 +1339,8 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 const SizedBox(height: 3),
                 Text(
                   evidence == null
-                      ? 'BLE TEST/MOCK'
-                      : 'BLE TEST/MOCK • RSSI ${evidence.rssi} dBm',
+                      ? 'Chưa có tín hiệu'
+                      : 'Tín hiệu BLE • RSSI ${evidence.rssi} dBm',
                   style: _font(
                     size: 11,
                     weight: FontWeight.w600,
@@ -1342,6 +1411,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
         unreadAnnouncementCount: _unreadAnnouncementCount,
         isLoading: _isLoading,
         errorMessage: _errorMessage,
+        showRoomSignal: _bleAttendanceEnabled,
         isNearbyRoomScanning: _isNearbyRoomScanning,
         nearbyRoomEvidence: _nearbyRoomEvidence,
         nearbyRoomError: _nearbyRoomError,
@@ -2875,8 +2945,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
 
   Future<void> _showFeedbackSheet() async {
     if (_useNormalizedVietnameseCopy()) {
-      _feedbackController.clear();
-
       await _showProfileBottomSheet(
         title: 'Góp ý cho ứng dụng',
         isScrollControlled: true,
@@ -2926,8 +2994,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
               iconColor: _warning,
               iconBg: const Color(0xFFFFF5DB),
               title: 'Trạng thái hiện tại',
-              body:
-                  'Form góp ý đã có giao diện trong app. Kết nối gửi lên máy chủ sẽ được bổ sung ở bước sau.',
+              body: 'Chức năng gửi góp ý chưa được kết nối với máy chủ.',
             ),
             const SizedBox(height: 16),
             SizedBox(
@@ -2945,11 +3012,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                   }
 
                   Navigator.of(context).pop();
-                  _feedbackController.clear();
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text(
-                        'Đã ghi nhận nội dung trong app. Chức năng gửi lên hệ thống sẽ bổ sung sau.',
+                        'Chưa thể gửi phản hồi. Nội dung của bạn vẫn được giữ lại.',
                       ),
                     ),
                   );
@@ -2977,8 +3043,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
       );
       return;
     }
-
-    _feedbackController.clear();
 
     await _showProfileBottomSheet(
       title: 'Góp ý cho ứng dụng',
@@ -3029,8 +3093,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
             iconColor: _warning,
             iconBg: const Color(0xFFFFF5DB),
             title: 'Trạng thái hiện tại',
-            body:
-                'Form góp ý đã có giao diện trong app. Kết nối gửi lên máy chủ sẽ được bổ sung ở bước sau.',
+            body: 'Chức năng gửi góp ý chưa được kết nối với máy chủ.',
           ),
           const SizedBox(height: 16),
           SizedBox(
@@ -3048,11 +3111,10 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
                 }
 
                 Navigator.of(context).pop();
-                _feedbackController.clear();
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text(
-                      'Đã ghi nhận nội dung trong app. Chức năng gửi lên hệ thống sẽ bổ sung sau.',
+                      'Chưa thể gửi phản hồi. Nội dung của bạn vẫn được giữ lại.',
                     ),
                   ),
                 );
@@ -3661,6 +3723,7 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
   }
 
   Future<void> _logout() async {
+    AuthSessionController.instance.clear();
     await _authPersistenceService.clearSavedSessionKeepingContext(
       school: widget.selectedSchool,
       role: widget.session.role,

@@ -38,7 +38,7 @@ thresholds:
 
 recognition:
   model_name: "buffalo_l"
-  model_path: "/models/w600k_r50.onnx"
+  model_path: "models/w600k_r50.onnx"
   intra_op_threads: 1
 
 multi_frame:

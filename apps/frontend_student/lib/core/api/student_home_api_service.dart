@@ -1,10 +1,9 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-
 import '../../shared/models/student_home_model.dart';
 import '../ble/ble_models.dart';
 import '../config/api_config.dart';
+import 'app_http_client.dart';
 import '../location/gps_evidence.dart';
 
 class StudentHomeApiService {
@@ -23,7 +22,7 @@ class StudentHomeApiService {
   }) async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/students/home');
 
-    final response = await http.get(uri, headers: _headers);
+    final response = await AppHttpClient.shared.get(uri, headers: _headers);
     final payload = _decodePayload(response.body);
 
     if (response.statusCode != 200) {
@@ -41,10 +40,11 @@ class StudentHomeApiService {
     required String schoolCode,
     required String mssv,
     required int sessionId,
-    required String faceSessionId,
-    required String faceSessionToken,
-    required String faceShard,
-    required BleEvidence bleEvidence,
+    String? faceSessionId,
+    String? faceSessionToken,
+    String? faceShard,
+    String? mobileFaceSessionId,
+    BleEvidence? bleEvidence,
     required double? faceScore,
     required DateTime faceVerifiedAt,
     required GpsEvidence gpsEvidence,
@@ -54,10 +54,14 @@ class StudentHomeApiService {
       uri,
       body: {
         'sessionId': sessionId,
-        'faceSessionId': faceSessionId,
-        'faceSessionToken': faceSessionToken,
-        'faceShard': faceShard,
-        'bleEvidence': bleEvidence.toJson(),
+        if (mobileFaceSessionId != null)
+          'mobileFaceSessionId': mobileFaceSessionId
+        else ...{
+          'faceSessionId': faceSessionId,
+          'faceSessionToken': faceSessionToken,
+          'faceShard': faceShard,
+        },
+        if (bleEvidence != null) 'bleEvidence': bleEvidence.toJson(),
         'faceEvidence': {
           'verified': true,
           'score': faceScore,
@@ -80,7 +84,7 @@ class StudentHomeApiService {
       '${ApiConfig.baseUrl}/students/schedule',
     ).replace(queryParameters: {'view': view, 'date': date});
 
-    final response = await http.get(uri, headers: _headers);
+    final response = await AppHttpClient.shared.get(uri, headers: _headers);
     final payload = _decodePayload(response.body);
 
     if (response.statusCode != 200) {
@@ -101,7 +105,7 @@ class StudentHomeApiService {
     Uri uri, {
     required Map<String, Object?> body,
   }) async {
-    final response = await http.post(
+    final response = await AppHttpClient.shared.post(
       uri,
       headers: _headers,
       body: jsonEncode(body),

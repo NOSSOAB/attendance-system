@@ -30,6 +30,9 @@ class VerificationFrameSample:
     captured_at: float
     challenge_index: int
     recognition_keypoints: tuple[tuple[float, float], ...] | None = None
+    # Assigned by the server, never accepted from the client. These samples are
+    # pinned to the exact frames that established and completed each challenge.
+    identity_role: str = ""
 
 
 @dataclass
@@ -52,6 +55,7 @@ class AuthSession:
     best_bbox: tuple[int, int, int, int] | None = None
     best_frame_quality: float = -1.0
     verification_samples: list[VerificationFrameSample] = field(default_factory=list)
+    identity_samples: dict[tuple[int, str], VerificationFrameSample] = field(default_factory=dict)
     last_sample_at: float | None = None
     latest_detection: FaceDetectionResult | None = None
     recognition_result: RecognitionResult | None = None

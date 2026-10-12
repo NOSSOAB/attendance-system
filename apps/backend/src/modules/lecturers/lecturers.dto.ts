@@ -9,6 +9,7 @@ import {
   Max,
   MaxLength,
   Min,
+  ValidateIf,
   ValidateNested,
 } from 'class-validator';
 
@@ -61,6 +62,11 @@ export class CreateAttendanceSessionDto {
 }
 
 export class SaveAttendanceRecordDto {
+  // Required for edits. null means the client saw no record for this student.
+  @ValidateIf((_object, value) => value !== null)
+  @IsISO8601({ strict: true })
+  expectedUpdatedAt!: string | null;
+
   @IsOptional()
   @Type(() => Number)
   @IsInt()

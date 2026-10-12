@@ -1,0 +1,6 @@
+# Never commit android/key.properties or the keystore itself.
+# Use a path relative to android/, for example: ../keys/smartattendance-release.jks
+storeFile=../keys/smartattendance-release.jks
+storePassword=replace-with-keystore-password
+keyAlias=smartattendance
+keyPassword=replace-with-key-password

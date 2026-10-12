@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 import 'dart:math' as math;
 
 import 'package:camera/camera.dart';
@@ -159,10 +160,20 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
             nextResult = await _api.getStatus(ticket);
           } else {
             final photo = await camera.takePicture();
-            nextResult = await _api.sendFrame(
-              ticket: ticket,
-              jpegBytes: await photo.readAsBytes(),
-            );
+            try {
+              nextResult = await _api.sendFrame(
+                ticket: ticket,
+                jpegBytes: await photo.readAsBytes(),
+              );
+            } finally {
+              if (photo.path.isNotEmpty) {
+                try {
+                  await File(photo.path).delete();
+                } on FileSystemException {
+                  // Camera plugins may clean their own temporary file first.
+                }
+              }
+            }
             await Future<void>.delayed(const Duration(milliseconds: 280));
           }
 
@@ -225,7 +236,10 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
       _returningResult = false;
       return;
     }
-    Navigator.of(context).pop(result);
+    await _releaseCamera();
+    if (mounted && !_cancelled) {
+      Navigator.of(context).pop(result);
+    }
   }
 
   Future<void> _retry() async {
@@ -424,8 +438,20 @@ class _FaceVerificationScreenState extends State<FaceVerificationScreen> {
     if (ticket != null && !_isSuccess) {
       await _api.deleteSession(ticket);
     }
+    await _releaseCamera();
     if (mounted) {
       Navigator.of(context).pop();
+    }
+  }
+
+  Future<void> _releaseCamera() async {
+    final camera = _camera;
+    _camera = null;
+    if (camera == null) return;
+    try {
+      await camera.dispose();
+    } catch (_) {
+      // CameraX can finish releasing the preview surface concurrently.
     }
   }
 

@@ -15,6 +15,8 @@ import { RolesGuard } from '../auth/roles.guard';
 import {
   AttendanceFaceSessionDto,
   AttendanceScanDto,
+  MobileFaceCompleteDto,
+  MobileFaceEnrollmentDto,
   StudentHistoryQueryDto,
   StudentScheduleQueryDto,
 } from './students.dto';
@@ -62,6 +64,55 @@ export class StudentsController {
       ...this.identity(user),
       ...body,
     });
+  }
+
+  @Post('attendance/mobile-face-session')
+  async startMobileAttendanceFaceSession(
+    @CurrentUser() user: JwtPrincipal,
+    @Body() body: AttendanceFaceSessionDto,
+  ) {
+    return this.studentsService.startMobileAttendanceFaceSession({
+      ...this.identity(user),
+      ...body,
+    });
+  }
+
+  @Post('attendance/mobile-face-session/complete')
+  async completeMobileAttendanceFaceSession(
+    @CurrentUser() user: JwtPrincipal,
+    @Body() body: MobileFaceCompleteDto,
+  ) {
+    return this.studentsService.completeMobileAttendanceFaceSession({
+      ...this.identity(user),
+      ...body,
+    });
+  }
+
+  @Post('attendance/mobile-face-enrollment')
+  async enrollMobileFace(
+    @CurrentUser() user: JwtPrincipal,
+    @Body() body: MobileFaceEnrollmentDto,
+  ) {
+    return this.studentsService.enrollMobileFace({
+      ...this.identity(user),
+      ...body,
+    });
+  }
+
+  @Get('mobile-face-devices')
+  async listMobileFaceDevices(@CurrentUser() user: JwtPrincipal) {
+    return this.studentsService.listMobileFaceDevices(this.identity(user));
+  }
+
+  @Post('mobile-face-devices/:keyFingerprint/revoke')
+  async revokeMobileFaceDevice(
+    @CurrentUser() user: JwtPrincipal,
+    @Param('keyFingerprint') keyFingerprint: string,
+  ) {
+    return this.studentsService.revokeMobileFaceDevice(
+      this.identity(user),
+      keyFingerprint,
+    );
   }
 
   @Get('attendance-history')

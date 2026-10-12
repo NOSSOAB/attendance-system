@@ -18,8 +18,6 @@ export type ScheduleBounds = {
   endsAt: Date | null;
 };
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 export function resolveScheduleBounds(
   schedule: RecurringSchedule,
 ): ScheduleBounds {
@@ -62,7 +60,7 @@ export function isScheduleOccurrenceOnDate(
     );
   }
 
-  if (getIsoDay(date) !== schedule.dayOfWeek) {
+  if (schoolIsoDay(date) !== schedule.dayOfWeek) {
     return false;
   }
 
@@ -93,14 +91,14 @@ export function resolveScheduleOccurrenceDates(
   rangeEndExclusive: Date,
 ) {
   const dates: Date[] = [];
-  const cursor = startOfDay(rangeStart);
-  const end = startOfDay(rangeEndExclusive);
+  let cursor = schoolStartOfDay(rangeStart);
+  const end = schoolStartOfDay(rangeEndExclusive);
 
   while (cursor.getTime() < end.getTime()) {
     if (isScheduleOccurrenceOnDate(schedule, cursor)) {
       dates.push(new Date(cursor));
     }
-    cursor.setDate(cursor.getDate() + 1);
+    cursor = schoolAddDays(cursor, 1);
   }
 
   return dates;
@@ -113,10 +111,9 @@ function normalizeRecurrenceKind(
 }
 
 function firstMatchingDayOnOrAfter(date: Date, dayOfWeek: number) {
-  const result = startOfDay(date);
-  const daysUntilMatch = (dayOfWeek - getIsoDay(result) + 7) % 7;
-  result.setDate(result.getDate() + daysUntilMatch);
-  return result;
+  const result = schoolStartOfDay(date);
+  const daysUntilMatch = (dayOfWeek - schoolIsoDay(result) + 7) % 7;
+  return schoolAddDays(result, daysUntilMatch);
 }
 
 function parseDate(value: DateValue) {
@@ -124,23 +121,18 @@ function parseDate(value: DateValue) {
     return null;
   }
 
-  const parsed = value instanceof Date ? new Date(value) : new Date(value);
+  const parsed =
+    value instanceof Date ? new Date(value) : parseSchoolDate(value);
   return Number.isNaN(parsed.getTime()) ? null : parsed;
 }
 
 function calendarDayOrdinal(value: Date) {
-  return Math.floor(
-    Date.UTC(value.getFullYear(), value.getMonth(), value.getDate()) / DAY_MS,
-  );
+  return schoolCalendarOrdinal(value);
 }
-
-function startOfDay(value: Date) {
-  const result = new Date(value);
-  result.setHours(0, 0, 0, 0);
-  return result;
-}
-
-function getIsoDay(value: Date) {
-  const day = value.getDay();
-  return day === 0 ? 7 : day;
-}
+import {
+  parseSchoolDate,
+  schoolAddDays,
+  schoolCalendarOrdinal,
+  schoolIsoDay,
+  schoolStartOfDay,
+} from './business-time';

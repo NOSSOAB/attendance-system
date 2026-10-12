@@ -1,10 +1,9 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-
 import '../../shared/models/auth_session_model.dart';
 import '../../shared/models/user_role.dart';
 import '../config/api_config.dart';
+import 'app_http_client.dart';
 
 class AuthApiService {
   Future<AuthSessionModel> login({
@@ -56,7 +55,7 @@ class AuthApiService {
     Uri uri, {
     required Map<String, Object> body,
   }) async {
-    final response = await http.post(
+    final response = await AppHttpClient.shared.post(
       uri,
       headers: const {'Content-Type': 'application/json'},
       body: jsonEncode(body),

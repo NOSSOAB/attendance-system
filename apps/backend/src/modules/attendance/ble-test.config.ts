@@ -3,6 +3,7 @@ import type {
   BleEvidence,
   BleSessionExpectation,
 } from './attendance.domain';
+import { parseRegistry, verifyBleC6Token } from './ble-c6-verifier';
 
 export const BLE_SCAN_MIN_MS = 5_000;
 export const BLE_SCAN_MAX_MS = 8_000;
@@ -19,12 +20,14 @@ export class BleTestConfig {
   static readonly minRssi = BleTestConfig.readMinRssi();
 
   static forRoom(room: string): BleSessionExpectation {
+    const roomId = BleTestConfig.toRoomId(room);
     return {
       beaconId: BleTestConfig.beaconId,
-      roomId: BleTestConfig.toRoomId(room),
+      roomId,
       deviceName: BleTestConfig.deviceName,
       serviceUuid: BleTestConfig.serviceUuid,
       minRssi: BleTestConfig.minRssi,
+      deviceIds: BleTestConfig.deviceIds(BleTestConfig.beaconId, roomId),
     };
   }
 
@@ -36,13 +39,16 @@ export class BleTestConfig {
     schedule: { room: string };
   }): BleSessionExpectation {
     const fallback = BleTestConfig.forRoom(session.schedule.room);
+    const beaconId = session.beaconId?.trim() || fallback.beaconId;
+    const roomId = session.roomId?.trim() || fallback.roomId;
     return {
       ...fallback,
-      beaconId: session.beaconId?.trim() || fallback.beaconId,
-      roomId: session.roomId?.trim() || fallback.roomId,
+      beaconId,
+      roomId,
       serviceUuid:
         session.bleServiceUuid?.trim().toLowerCase() || fallback.serviceUuid,
       minRssi: session.bleMinRssi ?? fallback.minRssi,
+      deviceIds: BleTestConfig.deviceIds(beaconId, roomId),
     };
   }
 
@@ -57,6 +63,7 @@ export class BleTestConfig {
     if (!evidence) {
       return 'BLE_NOT_FOUND';
     }
+    if (evidence.isMock) return 'INVALID_EVIDENCE';
 
     const scannedAt = evidence.scannedAt ? new Date(evidence.scannedAt) : null;
     const scanDurationMs = Number(evidence.scanDurationMs);
@@ -65,14 +72,13 @@ export class BleTestConfig {
     const closesAt = session.closesAt ? new Date(session.closesAt) : null;
 
     if (
-      !evidence.beaconId?.trim() ||
-      !evidence.roomId?.trim() ||
       !scannedAt ||
       Number.isNaN(scannedAt.getTime()) ||
       !Number.isFinite(rssi) ||
       !Number.isFinite(scanDurationMs) ||
       scanDurationMs < BLE_SCAN_MIN_MS ||
       scanDurationMs > BLE_SCAN_MAX_MS ||
+      Math.abs(Date.now() - scannedAt.getTime()) > 2 * 60_000 ||
       (openedAt && scannedAt.getTime() < openedAt.getTime()) ||
       (closesAt && scannedAt.getTime() > closesAt.getTime()) ||
       scannedAt.getTime() > Date.now() + 30_000
@@ -80,16 +86,13 @@ export class BleTestConfig {
       return 'INVALID_EVIDENCE';
     }
 
+    const authenticated = evidence.c6Token
+      ? verifyBleC6Token(evidence.c6Token)
+      : null;
+    if (!authenticated) return 'INVALID_EVIDENCE';
     if (
-      evidence.beaconId.trim() !== expected.beaconId ||
-      evidence.roomId.trim() !== expected.roomId
-    ) {
-      return 'BLE_ROOM_MISMATCH';
-    }
-
-    if (
-      evidence.serviceUuid?.trim() &&
-      evidence.serviceUuid.trim().toLowerCase() !== expected.serviceUuid
+      authenticated.beaconId !== expected.beaconId ||
+      authenticated.roomId !== expected.roomId
     ) {
       return 'BLE_ROOM_MISMATCH';
     }
@@ -114,5 +117,13 @@ export class BleTestConfig {
   private static readMinRssi() {
     const configured = Number(process.env.BLE_TEST_MIN_RSSI ?? -80);
     return Number.isFinite(configured) ? Math.round(configured) : -80;
+  }
+
+  private static deviceIds(beaconId: string, roomId: string): string[] {
+    return [...parseRegistry(process.env.BLE_C6_DEVICES_JSON ?? '').values()]
+      .filter(
+        (device) => device.beaconId === beaconId && device.roomId === roomId,
+      )
+      .map((device) => device.deviceId);
   }
 }

@@ -1,14 +1,26 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
-import { PrismaClient } from '@prisma/client';
+import { Prisma, PrismaClient } from '@prisma/client';
 // eslint-disable-next-line @typescript-eslint/no-require-imports
 import Workbook = require('exceljs/lib/doc/workbook');
 import { PrismaTenantService } from '../../database/prisma/prisma-tenant.service';
 import { BleTestConfig } from '../attendance/ble-test.config';
+import { lockAttendanceSession } from '../attendance/attendance-session-lock';
 import { isScheduleOccurrenceOnDate } from '../schedules/schedule-recurrence';
+import {
+  parseSchoolDate,
+  schoolDateKey,
+  schoolDateParts,
+  schoolStartOfDay,
+  schoolAddDays,
+  schoolWithTime,
+  schoolIsoDay,
+} from '../schedules/business-time';
 
 type LecturerBaseQuery = {
   schoolCode?: string;
@@ -43,6 +55,7 @@ type SaveAttendanceBody = {
     status: 'OK' | 'REVIEW' | 'ABSENT';
     note?: string;
     checkInAt?: string | null;
+    expectedUpdatedAt: string | null;
   }>;
 };
 
@@ -52,6 +65,12 @@ type LecturerContext = {
   studentPrisma: PrismaClient;
   lecturerPrisma: PrismaClient;
   lecturerProfile: any;
+  studentLecturerId: number | null;
+};
+
+type StudentDataContext = {
+  schoolCode: string;
+  studentPrisma: Prisma.TransactionClient;
 };
 
 type SessionWindow = {
@@ -76,6 +95,7 @@ type NotificationCreateInput = {
 
 @Injectable()
 export class LecturersService {
+  private readonly logger = new Logger(LecturersService.name);
   constructor(private readonly prismaTenant: PrismaTenantService) {}
 
   async getLecturerHome(query: LecturerBaseQuery) {
@@ -266,76 +286,68 @@ export class LecturersService {
     this.assertSessionMatchesSchedule(schedule, window.startAt);
     const bleExpectation = BleTestConfig.forRoom(schedule.room);
 
-    const openSession = await context.studentPrisma.attendanceSession.findFirst(
-      {
-        where: {
-          scheduleId: schedule.id,
-          status: 'open',
-        },
-        orderBy: [{ attendanceDate: 'desc' }, { id: 'desc' }],
-      },
-    );
-
-    if (openSession) {
-      throw new BadRequestException(
-        'Lớp học phần này đang có phiên điểm danh mở',
-      );
-    }
-
     let session;
     try {
-      session = await context.studentPrisma.attendanceSession.create({
-        data: {
-          scheduleId: schedule.id,
-          attendanceDate: window.startAt,
-          openedAt: window.startAt,
-          lateAt: new Date(window.startAt.getTime() + 10 * 60 * 1000),
-          closesAt: window.endAt,
-          beaconId: bleExpectation.beaconId,
-          roomId: bleExpectation.roomId,
-          bleServiceUuid: bleExpectation.serviceUuid,
-          bleMinRssi: bleExpectation.minRssi,
-          status: 'open',
-        },
+      session = await context.studentPrisma.$transaction(async (tx) => {
+        // Serialize session creation for the same schedule, including the first
+        // session for which there is no AttendanceSession row to lock yet.
+        await tx.$queryRaw`SELECT "id" FROM "Schedule" WHERE "id" = ${schedule.id} FOR UPDATE`;
+        const openSession = await tx.attendanceSession.findFirst({
+          where: { scheduleId: schedule.id, status: 'open' },
+        });
+        if (openSession) {
+          throw new BadRequestException(
+            'Lớp học phần này đang có phiên điểm danh mở',
+          );
+        }
+        const created = await tx.attendanceSession.create({
+          data: {
+            scheduleId: schedule.id,
+            attendanceDate: window.startAt,
+            openedAt: window.startAt,
+            lateAt: new Date(window.startAt.getTime() + 10 * 60 * 1000),
+            closesAt: window.endAt,
+            beaconId: bleExpectation.beaconId,
+            roomId: bleExpectation.roomId,
+            bleServiceUuid: bleExpectation.serviceUuid,
+            bleMinRssi: bleExpectation.minRssi,
+            status: 'open',
+          },
+        });
+        await this.ensureSessionRecords(
+          { schoolCode: context.schoolCode, studentPrisma: tx },
+          created.id,
+          students,
+        );
+        await tx.announcement.create({
+          data: {
+            schoolId: schedule.course.schoolId,
+            classId: schedule.classId,
+            title: 'Đã có phiên điểm danh',
+            body: `Môn ${schedule.course.name} đã mở phiên điểm danh từ ${this.formatDateTime(window.startAt)} đến ${this.formatDateTime(window.endAt)}.`,
+            type: 'attendance_available',
+          },
+        });
+        await tx.studentNotification.createMany({
+          data: students.map((student) => ({
+            studentId: student.id,
+            sessionId: created.id,
+            title: 'Đã có phiên điểm danh',
+            body: `Môn ${schedule.course.name} đã có phiên điểm danh và sẽ kết thúc lúc ${this.formatTime(window.endAt)}.`,
+            type: 'attendance_available',
+            isRead: false,
+          })),
+        });
+        return created;
       });
     } catch (error) {
       if (this.isUniqueConstraintError(error)) {
         throw new BadRequestException(
-          'Lá»›p há»c pháº§n nÃ y Ä‘ang cÃ³ phiÃªn Ä‘iá»ƒm danh má»Ÿ',
+          'Lớp học phần này đang có phiên điểm danh mở',
         );
       }
       throw error;
     }
-
-    await this.ensureSessionRecords(context, session.id, students);
-
-    await context.studentPrisma.announcement.create({
-      data: {
-        schoolId: schedule.course.schoolId,
-        classId: schedule.classId,
-        title: 'Đã có phiên điểm danh',
-        body: `Môn ${schedule.course.name} đã mở phiên điểm danh từ ${this.formatDateTime(window.startAt)} đến ${this.formatDateTime(window.endAt)}.`,
-        type: 'attendance_available',
-      },
-    });
-
-    await context.studentPrisma.studentNotification.deleteMany({
-      where: {
-        sessionId: session.id,
-        type: 'attendance_available',
-      },
-    });
-
-    await context.studentPrisma.studentNotification.createMany({
-      data: students.map((student) => ({
-        studentId: student.id,
-        sessionId: session.id,
-        title: 'Đã có phiên điểm danh',
-        body: `Môn ${schedule.course.name} đã có phiên điểm danh và sẽ kết thúc lúc ${this.formatTime(window.endAt)}.`,
-        type: 'attendance_available',
-        isRead: false,
-      })),
-    });
 
     await this.createLecturerNotification(context, {
       type: 'attendance_available',
@@ -343,8 +355,6 @@ export class LecturersService {
       title: 'Đã có phiên điểm danh',
       body: `Lớp ${this.buildClassCode(schedule)} đã mở phiên điểm danh từ ${this.formatDateTime(window.startAt)} đến ${this.formatDateTime(window.endAt)}.`,
     });
-
-    await this.syncEndingSoonNotifications(context, [schedule.id]);
 
     return {
       message: 'Đã tạo phiên điểm danh',
@@ -374,105 +384,105 @@ export class LecturersService {
   ) {
     const context = await this.getLecturerContext(query);
     const normalizedSessionId = this.ensurePositiveId(sessionId, 'sessionId');
-    const session = await context.studentPrisma.attendanceSession.findFirst({
-      where: {
-        id: normalizedSessionId,
-        schedule: this.buildOwnedScheduleWhere(context, false),
-      },
-      include: {
-        schedule: {
+    const { session, closedSession, students, savedRecords } =
+      await context.studentPrisma.$transaction(async (tx) => {
+        // Student scan writes and lecturer edits take the same lock. Read only
+        // after acquiring it so a scan cannot write through a concurrent close.
+        await lockAttendanceSession(tx, normalizedSessionId);
+        const session = await tx.attendanceSession.findFirst({
+          where: {
+            id: normalizedSessionId,
+            schedule: this.buildOwnedScheduleWhere(context, false),
+          },
           include: {
-            course: true,
-            offering: true,
-            studentClass: true,
+            schedule: {
+              include: { course: true, offering: true, studentClass: true },
+            },
+            records: true,
           },
-        },
-        records: true,
-      },
-    });
-
-    if (!session) {
-      throw new NotFoundException('Không tìm thấy phiên điểm danh');
-    }
-
-    const students = await this.getScheduleStudents(context, session.schedule);
-    const studentMap = new Map(
-      students.map((student) => [student.id, student]),
-    );
-    const existingRecordMap = this.getAttendanceRecordMap(session.records);
-    const seenStudentIds = new Set<number>();
-
-    for (const item of body.records ?? []) {
-      const student = studentMap.get(item.studentId);
-
-      if (!student) {
-        throw new BadRequestException(
-          `Sinh viên ${item.studentId} không thuộc lớp học phần này`,
+        });
+        if (!session) {
+          throw new NotFoundException('Không tìm thấy phiên điểm danh');
+        }
+        const students = await this.getScheduleStudents(
+          { schoolCode: context.schoolCode, studentPrisma: tx },
+          session.schedule,
         );
-      }
+        const studentIds = new Set(students.map((student) => student.id));
+        const existingRecordMap = this.getAttendanceRecordMap(session.records);
+        const seenStudentIds = new Set<number>();
 
-      if (seenStudentIds.has(item.studentId)) {
-        throw new BadRequestException(
-          `Sinh viên ${item.studentId} bị lặp dữ liệu`,
+        // Validate the complete batch before performing any record writes.
+        const updates = (body.records ?? []).map((item) => {
+          if (!studentIds.has(item.studentId)) {
+            throw new BadRequestException(
+              `Sinh viên ${item.studentId} không thuộc lớp học phần này`,
+            );
+          }
+          if (seenStudentIds.has(item.studentId)) {
+            throw new BadRequestException(
+              `Sinh viên ${item.studentId} bị lặp dữ liệu`,
+            );
+          }
+          seenStudentIds.add(item.studentId);
+          const existing = existingRecordMap.get(item.studentId);
+          const expectedVersion = item.expectedUpdatedAt === null
+            ? null
+            : item.expectedUpdatedAt
+              ? this.parseDateValue(item.expectedUpdatedAt, 'expectedUpdatedAt').getTime()
+              : undefined;
+          const actualVersion = existing?.updatedAt?.getTime() ?? null;
+          if (expectedVersion === undefined || expectedVersion !== actualVersion ||
+              (item.recordId !== undefined && item.recordId !== existing?.id)) {
+            throw new ConflictException(
+              `Dữ liệu điểm danh của sinh viên ${item.studentId} đã thay đổi. Vui lòng tải lại danh sách trước khi lưu.`,
+            );
+          }
+          return { item, existing, payload: this.buildRecordPayload(item, existing) };
+        });
+        for (const { item, existing, payload } of updates) {
+          await tx.attendanceRecord.upsert({
+            where: {
+              sessionId_studentId: { sessionId: session.id, studentId: item.studentId },
+            },
+            update: payload,
+            create: {
+              sessionId: session.id,
+              studentId: item.studentId,
+              scanAttempts: existing?.scanAttempts ?? 0,
+              ...payload,
+            },
+          });
+        }
+        const missingStudents = students.filter(
+          (student) => !existingRecordMap.has(student.id) && !seenStudentIds.has(student.id),
         );
-      }
-
-      seenStudentIds.add(item.studentId);
-      const existingRecord = existingRecordMap.get(item.studentId);
-      const updatePayload = this.buildRecordPayload(item, existingRecord);
-
-      await context.studentPrisma.attendanceRecord.upsert({
-        where: {
-          sessionId_studentId: {
-            sessionId: session.id,
-            studentId: item.studentId,
-          },
-        },
-        update: updatePayload,
-        create: {
-          sessionId: session.id,
-          studentId: item.studentId,
-          scanAttempts: existingRecord?.scanAttempts ?? 0,
-          ...updatePayload,
-        },
+        if (missingStudents.length > 0) {
+          await tx.attendanceRecord.createMany({
+            data: missingStudents.map((student) => ({
+              sessionId: session.id,
+              studentId: student.id,
+              status: 'absent',
+              scanResult: 'manual_absent',
+              scanAttempts: 0,
+              note: null,
+              lastFailureReason: 'Chưa điểm danh',
+              checkInAt: null,
+            })),
+          });
+        }
+        // Repeated close requests must not keep moving the historical close time.
+        const closedSession = session.status === 'closed'
+          ? session
+          : await tx.attendanceSession.update({
+              where: { id: session.id },
+              data: { status: 'closed', closesAt: new Date() },
+            });
+        const savedRecords = await tx.attendanceRecord.findMany({
+          where: { sessionId: session.id },
+        });
+        return { session, closedSession, students, savedRecords };
       });
-    }
-
-    const missingStudents = students.filter(
-      (student) =>
-        !existingRecordMap.has(student.id) && !seenStudentIds.has(student.id),
-    );
-
-    if (missingStudents.length > 0) {
-      await context.studentPrisma.attendanceRecord.createMany({
-        data: missingStudents.map((student) => ({
-          sessionId: session.id,
-          studentId: student.id,
-          status: 'absent',
-          scanResult: 'manual_absent',
-          scanAttempts: 0,
-          note: null,
-          lastFailureReason: 'Chưa điểm danh',
-          checkInAt: null,
-        })),
-      });
-    }
-
-    const closedSession = await context.studentPrisma.attendanceSession.update({
-      where: {
-        id: session.id,
-      },
-      data: {
-        status: 'closed',
-        closesAt: new Date(),
-      },
-    });
-
-    const savedRecords = await context.studentPrisma.attendanceRecord.findMany({
-      where: {
-        sessionId: session.id,
-      },
-    });
     const savedRecordMap = this.getAttendanceRecordMap(savedRecords);
     const summary = this.summarizeAttendance(students, savedRecordMap);
 
@@ -953,12 +963,24 @@ export class LecturersService {
       throw new NotFoundException('Không tìm thấy giảng viên');
     }
 
+    // Each tenant owns its numeric IDs. Match the stable school/code identity
+    // before using a lecturer foreign key in the student database.
+    const studentLecturer = await studentPrisma.lecturer.findFirst({
+      where: {
+        lecturerCode,
+        isActive: true,
+        school: { code: schoolCode },
+      },
+      select: { id: true },
+    });
+
     return {
       schoolCode,
       lecturerCode,
       studentPrisma,
       lecturerPrisma,
       lecturerProfile,
+      studentLecturerId: studentLecturer?.id ?? null,
     };
   }
 
@@ -1021,12 +1043,12 @@ export class LecturersService {
       ...(historical ? {} : { isActive: true }),
       OR: [
         {
-          lecturerId: context.lecturerProfile.id,
+          lecturerId: context.studentLecturerId ?? -1,
         },
         {
           lecturerAssignments: {
             some: {
-              lecturerId: context.lecturerProfile.id,
+              lecturerId: context.studentLecturerId ?? -1,
               ...(historical ? {} : { isActive: true }),
             },
           },
@@ -1136,7 +1158,7 @@ export class LecturersService {
   }
 
   private async getStudentsByClassIds(
-    context: LecturerContext,
+    context: StudentDataContext,
     classIds: number[],
     activeOnly = true,
   ) {
@@ -1171,7 +1193,7 @@ export class LecturersService {
   }
 
   private async getStudentsBySchedules(
-    context: LecturerContext,
+    context: StudentDataContext,
     schedules: any[],
     activeOnly = true,
   ) {
@@ -1250,7 +1272,7 @@ export class LecturersService {
   }
 
   private async getScheduleStudents(
-    context: LecturerContext,
+    context: StudentDataContext,
     schedule: any,
     activeOnly = true,
   ) {
@@ -1263,7 +1285,7 @@ export class LecturersService {
   }
 
   private async ensureSessionRecords(
-    context: LecturerContext,
+    context: StudentDataContext,
     sessionId: number,
     students: any[],
   ) {
@@ -1309,50 +1331,33 @@ export class LecturersService {
       return;
     }
 
-    const expiredSessions =
-      await context.studentPrisma.attendanceSession.findMany({
-        where: {
-          scheduleId: {
-            in: scheduleIds,
-          },
-          status: 'open',
-          closesAt: {
-            lt: new Date(),
-          },
-        },
-        include: {
-          schedule: {
-            include: {
-              course: true,
-              offering: true,
-              studentClass: true,
-            },
-          },
-        },
-      });
-
-    await context.studentPrisma.attendanceSession.updateMany({
-      where: {
-        scheduleId: {
-          in: scheduleIds,
-        },
-        status: 'open',
-        closesAt: {
-          lt: new Date(),
-        },
-      },
-      data: {
-        status: 'closed',
-      },
+    const now = new Date();
+    const candidates = await context.studentPrisma.attendanceSession.findMany({
+      where: { scheduleId: { in: scheduleIds }, status: 'open', closesAt: { lte: now } },
+      select: { id: true },
+      orderBy: { id: 'asc' },
     });
-
-    for (const session of expiredSessions) {
-      await this.createLecturerNotification(context, {
-        type: 'attendance_closed',
-        referenceKey: `attendance_closed:${session.id}`,
-        title: 'Phiên điểm danh đã kết thúc',
-        body: `Phiên điểm danh lớp ${this.buildClassCode(session.schedule)} đã kết thúc lúc ${this.formatDateTime(session.closesAt ?? new Date())}.`,
+    for (const candidate of candidates) {
+      const closed = await context.studentPrisma.$transaction(async (tx) => {
+        await lockAttendanceSession(tx, candidate.id);
+        const session = await tx.attendanceSession.findFirst({
+          where: { id: candidate.id, status: 'open', closesAt: { lte: now } },
+          include: { schedule: { include: { course: true, offering: true, studentClass: true } } },
+        });
+        if (!session) return null;
+        await tx.attendanceSession.update({
+          where: { id: session.id }, data: { status: 'closed' },
+        });
+        return session;
       });
+      if (closed) {
+        await this.createLecturerNotification(context, {
+          type: 'attendance_closed',
+          referenceKey: `attendance_closed:${closed.id}`,
+          title: 'Phiên điểm danh đã kết thúc',
+          body: `Phiên điểm danh lớp ${this.buildClassCode(closed.schedule)} đã kết thúc lúc ${this.formatDateTime(closed.closesAt ?? now)}.`,
+        });
+      }
     }
   }
 
@@ -1443,6 +1448,7 @@ export class LecturersService {
     context: LecturerContext,
     take?: number,
   ) {
+    await this.reconcileSessionNotifications(context);
     const notifications =
       await context.lecturerPrisma.lecturerNotification.findMany({
         where: {
@@ -1460,47 +1466,90 @@ export class LecturersService {
     };
   }
 
+  private async reconcileSessionNotifications(context: LecturerContext) {
+    // Sessions are the durable source for cross-database notifications. Retry
+    // missing open/close events on reads without changing existing read status.
+    let lastId = 0;
+    for (;;) {
+      const sessions = await context.studentPrisma.attendanceSession.findMany({
+        where: {
+          id: { gt: lastId },
+          status: { in: ['open', 'closed'] },
+          schedule: this.buildOwnedScheduleWhere(context, true),
+        },
+        include: { schedule: { include: { course: true, offering: true, studentClass: true } } },
+        orderBy: { id: 'asc' },
+        take: 200,
+      });
+      if (!sessions.length) return;
+      const keys = sessions.flatMap((session) => [
+        this.notificationReferenceKey(context, `attendance_available:${session.id}`),
+        ...(session.status === 'closed'
+          ? [this.notificationReferenceKey(context, `attendance_closed:${session.id}`)]
+          : []),
+      ]);
+      const existing = await context.lecturerPrisma.lecturerNotification.findMany({
+        where: { referenceKey: { in: keys } },
+        select: { referenceKey: true },
+      });
+      const existingKeys = new Set(existing.map((item) => item.referenceKey));
+      for (const session of sessions) {
+        if (!existingKeys.has(this.notificationReferenceKey(context, `attendance_available:${session.id}`))) {
+          await this.createLecturerNotification(context, {
+            type: 'attendance_available',
+            referenceKey: `attendance_available:${session.id}`,
+            title: 'Đã có phiên điểm danh',
+            body: `Lớp ${this.buildClassCode(session.schedule)} đã mở phiên điểm danh lúc ${this.formatDateTime(session.openedAt ?? session.attendanceDate)}.`,
+          }, true);
+        }
+        if (session.status === 'closed' &&
+            !existingKeys.has(this.notificationReferenceKey(context, `attendance_closed:${session.id}`))) {
+          await this.createLecturerNotification(context, {
+            type: 'attendance_closed',
+            referenceKey: `attendance_closed:${session.id}`,
+            title: 'Phiên điểm danh đã kết thúc',
+            body: `Phiên điểm danh lớp ${this.buildClassCode(session.schedule)} đã kết thúc lúc ${this.formatDateTime(session.closesAt ?? session.attendanceDate)}.`,
+          }, true);
+        }
+      }
+      lastId = sessions[sessions.length - 1].id;
+    }
+  }
+
+  private notificationReferenceKey(context: LecturerContext, referenceKey: string) {
+    return `${context.schoolCode}:${context.lecturerCode}:${referenceKey}`;
+  }
+
   private async createLecturerNotification(
     context: LecturerContext,
     input: NotificationCreateInput,
+    onlyIfMissing = false,
   ) {
-    if (input.referenceKey) {
-      const notification =
-        await context.lecturerPrisma.lecturerNotification.upsert({
-          where: {
-            referenceKey: input.referenceKey,
-          },
-          update: {
-            title: input.title,
-            body: input.body,
-            type: input.type,
-            lecturerId: context.lecturerProfile.id,
-          },
-          create: {
-            lecturerId: context.lecturerProfile.id,
-            title: input.title,
-            body: input.body,
-            type: input.type,
-            isRead: false,
-            referenceKey: input.referenceKey,
-          },
-        });
-
+    // A co-lecturer owns a separate inbox even when sharing the same session.
+    const referenceKey = input.referenceKey
+      ? this.notificationReferenceKey(context, input.referenceKey)
+      : undefined;
+    try {
+      const data = {
+        lecturerId: context.lecturerProfile.id,
+        title: input.title,
+        body: input.body,
+        type: input.type,
+      };
+      const notification = referenceKey
+        ? await context.lecturerPrisma.lecturerNotification.upsert({
+            where: { referenceKey },
+            update: onlyIfMissing ? {} : data,
+            create: { ...data, isRead: false, referenceKey },
+          })
+        : await context.lecturerPrisma.lecturerNotification.create({ data });
       return this.mapNotification(notification);
+    } catch {
+      // Attendance has already committed in the student tenant. Do not report
+      // it as failed because the other tenant's inbox is temporarily down.
+      this.logger.warn(`Lecturer notification delivery deferred: ${referenceKey ?? input.type}`);
+      return null;
     }
-
-    const notification =
-      await context.lecturerPrisma.lecturerNotification.create({
-        data: {
-          lecturerId: context.lecturerProfile.id,
-          title: input.title,
-          body: input.body,
-          type: input.type,
-          isRead: false,
-        },
-      });
-
-    return this.mapNotification(notification);
   }
 
   private buildRecordPayload(
@@ -1517,7 +1566,7 @@ export class LecturersService {
 
     if (item.status === 'OK') {
       return {
-        status: 'present',
+        status: existing?.status === 'late' ? 'late' : 'present',
         scanResult:
           existing?.scanResult === 'success' ? existing.scanResult : 'manual',
         checkInAt,
@@ -1630,6 +1679,7 @@ export class LecturersService {
 
     return {
       recordId: record?.id ?? null,
+      updatedAt: record?.updatedAt?.toISOString() ?? null,
       studentId: student.id,
       mssv: student.mssv,
       fullName: student.fullName,
@@ -1742,7 +1792,7 @@ export class LecturersService {
   }
 
   private parseDateValue(value: string, fieldName: string) {
-    const parsed = new Date(value);
+    const parsed = parseSchoolDate(value);
 
     if (Number.isNaN(parsed.getTime())) {
       throw new BadRequestException(`${fieldName} không hợp lệ`);
@@ -1765,15 +1815,11 @@ export class LecturersService {
   }
 
   private combineDateAndTime(source: Date, timeValue: string) {
-    const [hours, minutes] = timeValue.split(':').map((value) => Number(value));
-    const result = new Date(source);
-    result.setHours(hours || 0, minutes || 0, 0, 0);
-    return result;
+    return schoolWithTime(source, timeValue);
   }
 
   private getIsoDay(value: Date) {
-    const day = value.getDay();
-    return day === 0 ? 7 : day;
+    return schoolIsoDay(value);
   }
 
   private buildClassCode(schedule: any) {
@@ -1790,16 +1836,13 @@ export class LecturersService {
   }
 
   private formatDate(value: Date) {
-    const day = `${value.getDate()}`.padStart(2, '0');
-    const month = `${value.getMonth() + 1}`.padStart(2, '0');
-    const year = `${value.getFullYear()}`;
-    return `${day}/${month}/${year}`;
+    const { year, month, day } = schoolDateParts(value);
+    return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`;
   }
 
   private formatTime(value: Date) {
-    const hours = `${value.getHours()}`.padStart(2, '0');
-    const minutes = `${value.getMinutes()}`.padStart(2, '0');
-    return `${hours}:${minutes}`;
+    const { hour, minute } = schoolDateParts(value);
+    return `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`;
   }
 
   private formatDateTime(value: Date) {
@@ -1807,10 +1850,7 @@ export class LecturersService {
   }
 
   private formatDateKey(value: Date) {
-    const year = `${value.getFullYear()}`;
-    const month = `${value.getMonth() + 1}`.padStart(2, '0');
-    const day = `${value.getDate()}`.padStart(2, '0');
-    return `${year}-${month}-${day}`;
+    return schoolDateKey(value);
   }
 
   private weekdayLabel(dayOfWeek: number) {
@@ -1819,15 +1859,11 @@ export class LecturersService {
   }
 
   private getDayStart(value: Date) {
-    const result = new Date(value);
-    result.setHours(0, 0, 0, 0);
-    return result;
+    return schoolStartOfDay(value);
   }
 
   private getDayEnd(value: Date) {
-    const result = this.getDayStart(value);
-    result.setDate(result.getDate() + 1);
-    return result;
+    return schoolAddDays(schoolStartOfDay(value), 1);
   }
 
   private sessionPriority(statusCode: string) {

@@ -92,6 +92,7 @@ class AuthenticationPipeline:
             session.best_bbox = None
             session.best_frame_quality = -1.0
             session.verification_samples.clear()
+            session.identity_samples.clear()
             session.last_sample_at = None
             session.latest_detection = None
             session.recognition_result = None
@@ -168,8 +169,10 @@ class AuthenticationPipeline:
             if not valid_face:
                 self._record_frame_issue(detection)
             if valid_face:
+                already_passed = session.engine.passed
                 previous_index = session.engine.current_index
                 previous_challenge = session.engine.current_challenge()
+                had_baseline = bool(previous_challenge and previous_challenge.baseline_seen)
                 sample_group = previous_index
                 if not session.engine.enabled:
                     sample_group = (session.frame_count - 1) // self.settings.samples_per_challenge
@@ -180,6 +183,11 @@ class AuthenticationPipeline:
                     challenge_index=sample_group,
                 )
                 liveness = session.engine.update_challenge_status(metrics, has_valid_face=True)
+                if session.engine.enabled:
+                    self._remember_identity_evidence(
+                        session, frame, detection, previous_index,
+                        previous_challenge, had_baseline, already_passed,
+                    )
                 if session.engine.current_index > previous_index and previous_challenge is not None:
                     self.logger.info(
                         "Liveness challenge passed id=%s action=%s confidence=%.3f yaw=%.1f pitch=%.1f roll=%.1f",
@@ -214,6 +222,8 @@ class AuthenticationPipeline:
                     )
             else:
                 session.engine.pause_current_challenge()
+                if not session.engine.passed:
+                    self._clear_identity_evidence(session, session.engine.current_index)
                 liveness = session.engine.snapshot(self.frames.face_waiting_message(detection))
 
             if session.engine.failed:
@@ -223,39 +233,8 @@ class AuthenticationPipeline:
                 self._record_terminal_locked(session)
                 self.logger.info("Liveness failed id=%s target=%s", session.session_id, session.target_name)
             elif session.engine.passed:
-                if session.identity_precheck_outcome is not None:
-                    if session.identity_precheck_outcome.passed:
-                        self._apply_verification_outcome_locked(
-                            session,
-                            session.identity_precheck_outcome,
-                            session.target_name,
-                        )
-                    elif (
-                        not session.identity_retry_started
-                        and len(session.verification_samples)
-                        >= self.settings.min_verification_samples
-                    ):
-                        session.identity_retry_started = True
-                        session.identity_precheck_outcome = None
-                        session.stage = SessionStage.VERIFYING
-                        session.final_message = (
-                            "Nhận dạng sớm chưa đạt; đang kiểm tra lại bằng toàn bộ khung hình tốt"
-                        )
-                        session.verification_started_at = time.monotonic()
-                        verification_payload = (
-                            session.generation,
-                            list(session.verification_samples),
-                            session.target_name,
-                            False,
-                        )
-                    else:
-                        session.final_message = (
-                            "Giữ khuôn mặt trong khung hình để kiểm tra lại danh tính "
-                            f"({len(session.verification_samples)}/{self.settings.min_verification_samples})"
-                        )
-                elif session.identity_precheck_started:
-                    session.stage = SessionStage.VERIFYING
-                    session.final_message = "Đang chờ kết quả nhận dạng đã chạy song song"
+                if session.engine.enabled and (-1, "final") not in session.identity_samples:
+                    session.final_message = "Nhìn thẳng vào camera để xác nhận danh tính cuối phiên"
                 elif len(session.verification_samples) < self.settings.min_verification_samples:
                     session.final_message = (
                         "Giữ khuôn mặt trong khung hình để thu đủ mẫu "
@@ -263,11 +242,12 @@ class AuthenticationPipeline:
                     )
                 else:
                     session.stage = SessionStage.VERIFYING
-                    session.final_message = "Đang xác minh danh tính trên nhiều khung hình"
+                    session.identity_retry_started = session.identity_precheck_started
+                    session.final_message = "Đang xác minh danh tính xuyên suốt các thử thách"
                     session.verification_started_at = time.monotonic()
                     verification_payload = (
                         session.generation,
-                        list(session.verification_samples),
+                        list(session.verification_samples) + list(session.identity_samples.values()),
                         session.target_name,
                         False,
                     )
@@ -312,6 +292,35 @@ class AuthenticationPipeline:
 
     def close(self) -> None:
         self._verification_pool.shutdown(wait=True, cancel_futures=True)
+
+    @staticmethod
+    def _clear_identity_evidence(session: AuthSession, index: int, actions_only: bool = False) -> None:
+        for key in list(session.identity_samples):
+            if key[0] == index and (not actions_only or key[1].startswith("action_")):
+                del session.identity_samples[key]
+
+    def _remember_identity_evidence(
+        self, session: AuthSession, frame: Any, detection: FaceDetectionResult,
+        index: int, challenge: Any, had_baseline: bool, already_passed: bool,
+    ) -> None:
+        if already_passed:
+            face = detection.primary_face
+            if face and max(abs(face.yaw), abs(face.pitch), abs(face.roll)) <= self.settings.final_pose_limit:
+                self.frames.remember_identity_sample(session, frame, detection, -1, "final")
+            return
+        if challenge is None:
+            return
+        if not challenge.baseline_seen:
+            self._clear_identity_evidence(session, index)
+        elif not had_baseline:
+            self._clear_identity_evidence(session, index)
+            self.frames.remember_identity_sample(session, frame, detection, index, "baseline")
+        if challenge.evidence_frames == 0:
+            self._clear_identity_evidence(session, index, actions_only=True)
+        else:
+            self.frames.remember_identity_sample(
+                session, frame, detection, index, f"action_{challenge.evidence_frames}"
+            )
 
     @property
     def verification_queue_pending(self) -> int:
@@ -366,11 +375,22 @@ class AuthenticationPipeline:
         target_name: str,
         early: bool = False,
     ) -> None:
+        with session.lock:
+            if session.generation != generation:
+                return
+            challenge_frame_counts = (
+                tuple(
+                    1 if item.action_id == "blink" else session.engine.confirmation_frames
+                    for item in session.engine.challenges
+                )
+                if not early and session.engine.enabled else None
+            )
         try:
             outcome = self.runtime.verify_frames(
                 samples,
                 target_name,
                 minimum_samples=(self.settings.recognition_sample_count if early else None),
+                challenge_frame_counts=challenge_frame_counts,
             )
         except Exception as exc:  # pragma: no cover - defensive boundary around native runtimes
             self.logger.exception(
@@ -389,66 +409,16 @@ class AuthenticationPipeline:
         with session.lock:
             if session.generation != generation:
                 return
-            if early and session.stage == SessionStage.LIVENESS:
-                session.identity_precheck_outcome = outcome
-                session.touch()
-                similarity = outcome.recognition.similarity if outcome.recognition else 0.0
-                self.logger.info(
-                    "Early identity recognition ready id=%s target=%s passed=%s similarity=%.3f elapsed=%.1fms",
-                    session.session_id,
-                    target_name,
-                    outcome.passed,
-                    similarity,
-                    outcome.elapsed_ms,
-                )
+            if early:
+                # An early result is provisional even if it arrives after liveness.
+                # Only the separate job containing challenge evidence may finish a session.
+                if not session.terminal:
+                    session.identity_precheck_outcome = outcome
+                    session.touch()
                 return
             if session.stage != SessionStage.VERIFYING:
                 return
-            if early and not outcome.passed:
-                if (
-                    not session.identity_retry_started
-                    and len(session.verification_samples)
-                    >= self.settings.min_verification_samples
-                ):
-                    session.identity_retry_started = True
-                    session.identity_precheck_outcome = outcome
-                    session.final_message = (
-                        "Nhận dạng sớm chưa đạt; đang kiểm tra lại bằng toàn bộ khung hình tốt"
-                    )
-                    retry_payload = (
-                        session.generation,
-                        list(session.verification_samples),
-                        target_name,
-                    )
-                else:
-                    self._apply_verification_outcome_locked(session, outcome, target_name)
-                    retry_payload = None
-            else:
-                self._apply_verification_outcome_locked(session, outcome, target_name)
-                retry_payload = None
-
-        if retry_payload is not None:
-            retry_generation, retry_samples, retry_target = retry_payload
-            try:
-                self._verification_pool.submit(
-                    self._verify_in_background,
-                    session,
-                    retry_generation,
-                    retry_samples,
-                    retry_target,
-                    False,
-                )
-            except ExecutorQueueFullError:
-                with session.lock:
-                    if (
-                        session.generation == retry_generation
-                        and session.stage == SessionStage.VERIFYING
-                    ):
-                        session.stage = SessionStage.FAILED
-                        session.result_code = "SERVER_BUSY"
-                        session.final_message = "FAILED: server busy; không thể kiểm tra lại"
-                        self._record_terminal_locked(session)
-                        session.touch()
+            self._apply_verification_outcome_locked(session, outcome, target_name)
 
     def _apply_verification_outcome_locked(
         self,
@@ -466,6 +436,7 @@ class AuthenticationPipeline:
         session.best_frame = None
         session.best_bbox = None
         session.verification_samples.clear()
+        session.identity_samples.clear()
         session.identity_precheck_outcome = None
         self._record_terminal_locked(session)
         session.touch()

@@ -6,7 +6,7 @@ paths:
   log_path: "logs"
 
 # One shard is intentionally capped at about 25 active verifications. The
-# production stack runs sixteen identical shards and routes every face session
+# production stack runs multiple identical shards and routes every face session
 # back to the shard that created it.
 backend:
   session_ttl_seconds: 300
@@ -43,7 +43,7 @@ thresholds:
 
 recognition:
   model_name: "buffalo_l"
-  model_path: "/models/w600k_r50.onnx"
+  model_path: "models/w600k_r50.onnx"
   intra_op_threads: 1
 
 multi_frame:

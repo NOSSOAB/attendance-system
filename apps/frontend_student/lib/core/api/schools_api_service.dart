@@ -1,15 +1,14 @@
 import 'dart:convert';
 
-import 'package:http/http.dart' as http;
-
 import '../../shared/models/school_model.dart';
 import '../config/api_config.dart';
+import 'app_http_client.dart';
 
 class SchoolsApiService {
   Future<List<SchoolModel>> getSchools() async {
     final uri = Uri.parse('${ApiConfig.baseUrl}/schools');
 
-    final response = await http.get(uri);
+    final response = await AppHttpClient.shared.get(uri);
 
     if (response.statusCode != 200) {
       throw Exception(

@@ -88,6 +88,63 @@ model FaceIdentity {
   @@index([isActive, updatedAt])
 }
 
+/// Mobile vectors are deliberately isolated from the server ArcFace templates.
+/// Embeddings from different model ids must never be compared with each other.
+model MobileFaceIdentity {
+  id                 Int      @id @default(autoincrement())
+  identityKey        String
+  modelId            String
+  meanEmbedding      Json
+  embeddingDimension Int
+  threshold          Float
+  enrollmentVersion  Int      @default(1)
+  isActive           Boolean  @default(true)
+  enrolledAt         DateTime @default(now())
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@unique([identityKey, modelId])
+  @@index([identityKey, isActive])
+  @@index([modelId, isActive, updatedAt])
+}
+
+/// Public half of an Android Keystore key bound only after a successful live
+/// match against an administrator-provisioned profile template.
+model MobileFaceDeviceKey {
+  id             Int      @id @default(autoincrement())
+  identityKey    String
+  keyFingerprint String   @unique
+  publicKeyDer   String
+  isActive       Boolean  @default(true)
+  enrolledAt     DateTime @default(now())
+  lastUsedAt     DateTime?
+  revokedAt      DateTime?
+
+  @@index([identityKey, isActive])
+}
+
+/// Short-lived, one-use server challenge for Android mobile face verification.
+/// The nonce is stored only as a SHA-256 digest. Device signatures are
+/// verified and discarded; only a key fingerprint is kept for audit.
+model MobileFaceSession {
+  id                  String    @id
+  identityKey         String
+  attendanceSessionId Int
+  nonceHash           String    @unique
+  modelId             String
+  challenges          Json
+  expiresAt           DateTime
+  consumedAt          DateTime?
+  auditRequired       Boolean   @default(false)
+  auditStatus         String    @default("pending")
+  deviceKeyFingerprint String?
+  integrityVerdict    Json?
+  createdAt           DateTime  @default(now())
+
+  @@index([identityKey, attendanceSessionId, expiresAt])
+  @@index([expiresAt, consumedAt])
+}
+
 model StudentAccount {
   id           Int       @id @default(autoincrement())
   studentId    Int       @unique

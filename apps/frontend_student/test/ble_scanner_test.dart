@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:frontend_student/core/ble/ble_models.dart';
 import 'package:frontend_student/core/ble/ble_scanner.dart';
@@ -31,7 +33,7 @@ void main() {
     expect(nearest?.beaconId, 'strong');
   });
 
-  test('maps the configured ESP32 advertisement to beacon and room', () {
+  test('maps actual signed device IDs across rooms and forwards proof', () {
     final scannedAt = DateTime.utc(2026, 7, 31, 5, 30);
     final evidence = mapEsp32Advertisement(
       advName: attendanceBleDeviceName,
@@ -39,11 +41,23 @@ void main() {
       rssi: -61,
       scannedAt: scannedAt,
       scanDuration: attendanceBleScanDuration,
+      proofPayload: utf8.encode(
+        jsonEncode({
+          'version': 1,
+          'beaconId': 'ESP32_B202',
+          'roomId': 'ROOM_B202',
+          'issuedAt': scannedAt.millisecondsSinceEpoch ~/ 1000,
+          'nonce': '0123456789abcdef',
+          'signature': 'a' * 64,
+        }),
+      ),
     );
 
     expect(evidence, isNotNull);
-    expect(evidence?.beaconId, attendanceBleBeaconId);
-    expect(evidence?.roomId, attendanceBleRoomId);
+    expect(evidence?.beaconId, 'ESP32_B202');
+    expect(evidence?.roomId, 'ROOM_B202');
+    expect(evidence?.toJson()['proof'], containsPair('signature', 'a' * 64));
+    expect(evidence?.toJson()['isMock'], false);
     expect(evidence?.deviceName, attendanceBleDeviceName);
     expect(evidence?.serviceUuid, attendanceBleServiceUuid);
     expect(evidence?.rssi, -61);
@@ -52,7 +66,7 @@ void main() {
     expect(evidence?.isMock, isFalse);
   });
 
-  test('ignores advertisements with another name or service UUID', () {
+  test('ignores unsigned advertisements and unrelated service UUIDs', () {
     final scannedAt = DateTime.utc(2026, 7, 31);
 
     expect(
@@ -75,6 +89,26 @@ void main() {
       ),
       isNull,
     );
+  });
+
+  test('forwards the ESP32-C6 manufacturer token without putting a key in the app', () {
+    final bytes = List<int>.generate(24, (index) => index);
+    final evidence = mapC6Advertisement(
+      manufacturerData: {0xffff: bytes},
+      advName: 'SecureAttendance_C6',
+      rssi: -60,
+      scannedAt: DateTime.utc(2026, 10, 13),
+      scanDuration: attendanceBleScanDuration,
+    );
+
+    expect(evidence, isNotNull);
+    expect(evidence!.c6Token, base64Encode([0xff, 0xff, ...bytes]));
+    expect(evidence.c6DeviceId, '03020100');
+    expect(evidence.toJson()['c6Token'], evidence.c6Token);
+    expect(evidence.toJson(), isNot(contains('serviceUuid')));
+    expect(evidence.toJson(), isNot(contains('beaconId')));
+    expect(evidence.toJson(), isNot(contains('roomId')));
+    expect(evidence.isMock, isFalse);
   });
 
   test('MockBleScanner uses the session expectation', () async {

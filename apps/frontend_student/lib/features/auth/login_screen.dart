@@ -105,7 +105,7 @@ class _LoginScreenState extends State<LoginScreen> {
       FocusScope.of(context).unfocus();
 
       final identifier = _identifierController.text.trim();
-      final password = _passwordController.text.replaceAll(RegExp(r'\D'), '');
+      final password = _passwordController.text;
 
       if (identifier.isEmpty) {
         setState(() {
@@ -116,10 +116,9 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      if (password.length != 8) {
+      if (password.length < 6 || password.length > 200) {
         setState(() {
-          _errorMessage =
-              'Vui l\u00f2ng nh\u1eadp \u0111\u1ee7 8 s\u1ed1 m\u1eadt kh\u1ea9u';
+          _errorMessage = 'Mật khẩu phải có từ 6 đến 200 ký tự';
           _infoMessage = null;
         });
         return;
@@ -177,7 +176,7 @@ class _LoginScreenState extends State<LoginScreen> {
     FocusScope.of(context).unfocus();
 
     final identifier = _identifierController.text.trim();
-    final password = _passwordController.text.replaceAll(RegExp(r'\D'), '');
+    final password = _passwordController.text;
 
     if (identifier.isEmpty) {
       setState(() {
@@ -187,9 +186,9 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
-    if (password.length != 8) {
+    if (password.length < 6 || password.length > 200) {
       setState(() {
-        _errorMessage = 'Vui lòng nhập đủ 8 chữ số của mật khẩu';
+        _errorMessage = 'Mật khẩu phải có từ 6 đến 200 ký tự';
         _infoMessage = null;
       });
       return;
@@ -293,7 +292,19 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   String _normalizeError(Object error) {
-    return error.toString().replaceFirst('Exception: ', '');
+    final message = error.toString();
+    final normalized = message.toLowerCase();
+    if (normalized.contains('socketexception') ||
+        normalized.contains('clientexception') ||
+        normalized.contains('timeoutexception') ||
+        normalized.contains('handshakeexception')) {
+      return 'Không kết nối được máy chủ. Hãy kiểm tra mạng rồi thử lại.';
+    }
+    if (normalized.contains('api_base_url') ||
+        normalized.contains('địa chỉ api không hợp lệ')) {
+      return 'Ứng dụng chưa được cấu hình máy chủ. Hãy cài bản APK mới.';
+    }
+    return message.replaceFirst('Exception: ', '');
   }
 
   String? _schoolLogoAsset(String code) {
@@ -630,7 +641,7 @@ class _LoginScreenState extends State<LoginScreen> {
               hintText: 'Nh\u1eadp m\u1eadt kh\u1ea9u',
               prefixIcon: Icons.lock_outline_rounded,
               textInputAction: TextInputAction.done,
-              keyboardType: TextInputType.number,
+              keyboardType: TextInputType.visiblePassword,
               obscureText: _obscurePassword,
               suffixIcon: IconButton(
                 onPressed: () {
@@ -646,7 +657,6 @@ class _LoginScreenState extends State<LoginScreen> {
                   color: _textSecondary,
                 ),
               ),
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               onSubmitted: (_) => _submit(),
             ),
             const SizedBox(height: 14),
@@ -722,7 +732,7 @@ class _LoginScreenState extends State<LoginScreen> {
             hintText: 'Nhập mật khẩu',
             prefixIcon: Icons.lock_outline_rounded,
             textInputAction: TextInputAction.done,
-            keyboardType: TextInputType.number,
+            keyboardType: TextInputType.visiblePassword,
             obscureText: _obscurePassword,
             suffixIcon: IconButton(
               onPressed: () {
@@ -738,7 +748,6 @@ class _LoginScreenState extends State<LoginScreen> {
                 color: _textSecondary,
               ),
             ),
-            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             onSubmitted: (_) => _submit(),
           ),
           const SizedBox(height: 14),

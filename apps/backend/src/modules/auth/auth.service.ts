@@ -72,7 +72,7 @@ export class AuthService {
     void identifier;
     return {
       message:
-        'Yêu cầu hỗ trợ mật khẩu đã được ghi nhận. Vui lòng liên hệ quản trị viên của trường để xác minh danh tính.',
+        'Hệ thống chưa hỗ trợ đặt lại mật khẩu tự động. Vui lòng liên hệ quản trị viên của trường để xác minh danh tính.',
     };
   }
 

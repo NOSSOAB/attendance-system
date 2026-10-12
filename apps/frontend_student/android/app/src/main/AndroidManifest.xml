@@ -34,11 +34,11 @@
         android:required="true" />
 
     <application
-        android:label="Smart Attendance"
+        android:label="Smart Attendance 2"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher"
         android:allowBackup="false"
-        android:usesCleartextTraffic="true">
+        android:usesCleartextTraffic="false">
 
         <activity
             android:name=".MainActivity"

@@ -140,6 +140,7 @@ class InferenceRuntime:
         samples: list[VerificationFrameSample],
         target_name: str,
         minimum_samples: int | None = None,
+        challenge_frame_counts: tuple[int, ...] | None = None,
     ) -> VerificationOutcome:
         self.load()
         pool = self._verification_model_pool
@@ -150,6 +151,7 @@ class InferenceRuntime:
                 target_name,
                 worker,
                 minimum_samples=minimum_samples,
+                challenge_frame_counts=challenge_frame_counts,
             )
 
     def _verify_frames_on_worker(
@@ -158,6 +160,7 @@ class InferenceRuntime:
         target_name: str,
         worker: VerificationWorker,
         minimum_samples: int | None = None,
+        challenge_frame_counts: tuple[int, ...] | None = None,
     ) -> VerificationOutcome:
         recognizer = worker.recognizer
         started = time.perf_counter()
@@ -189,10 +192,19 @@ class InferenceRuntime:
                 code="FRAME_DECODE_FAILED",
             )
 
-        recognition_inputs = _select_quality_across_time(
-            decoded,
-            self.settings.recognition_sample_count,
-        )
+        if challenge_frame_counts is not None:
+            recognition_inputs = _select_identity_evidence(decoded, challenge_frame_counts)
+            if recognition_inputs is None:
+                return VerificationOutcome(
+                    None, False,
+                    "FAILED: missing identity evidence for a liveness challenge or final frame",
+                    (time.perf_counter() - started) * 1000,
+                    "IDENTITY_EVIDENCE_INCOMPLETE",
+                )
+        else:
+            recognition_inputs = _select_quality_across_time(
+                decoded, self.settings.recognition_sample_count,
+            )
         if recognition_inputs and all(
             sample.recognition_keypoints is not None for sample, _frame in recognition_inputs
         ):
@@ -225,7 +237,7 @@ class InferenceRuntime:
             recognition_results,
             target_name,
             recognizer.threshold,
-            self.settings.min_recognition_pass_ratio,
+            1.0 if challenge_frame_counts is not None else self.settings.min_recognition_pass_ratio,
         )
         if recognition.error:
             self.logger.error("Recognition failed target=%s error=%s", target_name, recognition.error)
@@ -238,16 +250,30 @@ class InferenceRuntime:
             )
 
         passed = recognition.is_recognized
+        if challenge_frame_counts is not None:
+            # A high median cannot hide a different person during a challenge.
+            passed = passed and len(recognition_results) == len(recognition_inputs) and all(
+                result.is_recognized
+                and result.best_match_name == target_name
+                and math.isfinite(result.similarity)
+                and result.similarity >= recognizer.threshold
+                for result in recognition_results
+            )
+            recognition.is_recognized = passed
+            recognition.match_strategy = "liveness_identity_continuity"
         return VerificationOutcome(
             recognition=recognition,
             passed=passed,
             message=(
                 "SUCCESS: active liveness and multi-frame face recognition passed"
                 if passed
-                else "FAILED: identity not matched across enough frames"
+                else "FAILED: identity not matched throughout the liveness challenges"
             ),
             elapsed_ms=(time.perf_counter() - started) * 1000,
-            code="SUCCESS" if passed else "IDENTITY_NOT_MATCHED",
+            code=(
+                "SUCCESS" if passed else "IDENTITY_CONTINUITY_FAILED"
+                if challenge_frame_counts is not None else "IDENTITY_NOT_MATCHED"
+            ),
         )
 
     def verify(
@@ -330,6 +356,36 @@ def _decode_samples(
         if frame is not None:
             decoded.append((sample, frame))
     return decoded
+
+
+def _select_identity_evidence(
+    items: list[tuple[VerificationFrameSample, np.ndarray]],
+    challenge_frame_counts: tuple[int, ...],
+) -> list[tuple[VerificationFrameSample, np.ndarray]] | None:
+    """Require the exact baseline/action frames and a later final frame, in order."""
+    by_role = {}
+    for item in items:
+        sample = item[0]
+        if not sample.identity_role:
+            continue
+        key = (sample.challenge_index, sample.identity_role)
+        if key in by_role:
+            return None
+        by_role[key] = item
+    expected = [
+        (index, role)
+        for index, count in enumerate(challenge_frame_counts)
+        for role in ("baseline", *(f"action_{number}" for number in range(1, count + 1)))
+    ] + [(-1, "final")]
+    if not challenge_frame_counts or set(by_role) != set(expected):
+        return None
+    selected = [by_role[key] for key in expected]
+    timestamps = [item[0].captured_at for item in selected]
+    if not all(math.isfinite(value) for value in timestamps) or any(
+        before >= after for before, after in zip(timestamps, timestamps[1:])
+    ):
+        return None
+    return selected
 
 
 def _select_temporal_samples(
