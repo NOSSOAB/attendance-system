@@ -120,15 +120,28 @@ $env:FACE_DATABASE_URL = "postgresql://<người-dùng>:<mật-khẩu>@<máy-ch�
 Khi chạy Docker Compose, Dockerfile tự tải model cần thiết trong quá trình
 build. Không cần sao chép thêm source hoặc model từ project khác.
 
-## Điểm danh BLE
+## ESP32-C6 BLE
 
-Ứng dụng Flutter có hai chế độ quét BLE:
+Nhánh này giữ mã firmware ESP32-C6. Ứng dụng Flutter và API đồng bộ với token
+AES-GCM qua manufacturer data nằm trên nhánh `main`; dùng `main` khi chạy toàn bộ
+hệ thống. Không nạp sketch ở các commit cũ của nhánh này vì khóa AES từng được
+ghi trực tiếp trong mã Git. Khóa cũ không được dùng lại.
 
-- Chế độ mô phỏng: `--dart-define=USE_MOCK_BLE=true`.
-- Chế độ thiết bị thật: `--dart-define=USE_MOCK_BLE=false`.
+Tạo khóa riêng cho từng board trước khi nạp `SecureAttendance_C6.ino`:
 
-Thiết bị BLE cần quảng bá đúng tên, mã beacon và Service UUID đã cấu hình trong
-backend.
+```bash
+python create_device_secrets.py \
+  --device-id A1B2C3D4 \
+  --beacon-id ESP32_TEST_01 \
+  --room-id ROOM_A101
+```
+
+Thay các mã ví dụ bằng ID và phòng thực tế. Script tạo
+`ble_device_secrets.h` cho firmware và `ble_device_registry.local.json` để
+đăng ký thiết bị trong `BLE_C6_DEVICES_JSON` trên EC2. Hai file này được Git
+bỏ qua; không đưa khóa vào APK hay repository. Mỗi board cần ID và khóa riêng.
+Chỉ bật `ATTENDANCE_REQUIRE_BLE=true` trên backend sau khi đã nạp board và
+đăng ký đúng khóa/phòng.
 
 ## Tài khoản demo
 

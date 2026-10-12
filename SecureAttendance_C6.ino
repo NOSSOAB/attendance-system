@@ -7,6 +7,12 @@
 #include <esp_system.h>
 #include <esp_bt.h>
 
+#if __has_include("ble_device_secrets.h")
+#include "ble_device_secrets.h"
+#else
+#error "Create ble_device_secrets.h before flashing; see README.md"
+#endif
+
 // ======================================================
 // CẤU HÌNH
 // ======================================================
@@ -31,22 +37,7 @@ const unsigned long TOKEN_INTERVAL = 30000;
 // KHÔNG đưa ROOM_301 / ROOM_302 trực tiếp vào BLE.
 // ======================================================
 
-const uint32_t DEVICE_ID = 0xA1B2C3D4;
-
-
-// ======================================================
-// AES-128 KEY
-//
-// Chỉ dùng cho prototype/test.
-// Không hard-code key trong hệ thống thực tế.
-// ======================================================
-
-const uint8_t AES_KEY[16] = {
-  0x21, 0x47, 0x93, 0xA8,
-  0x15, 0x62, 0xCE, 0x39,
-  0x74, 0xB1, 0x08, 0xF5,
-  0xD2, 0x6A, 0x40, 0x9C
-};
+// DEVICE_ID and AES_KEY are defined in the local, untracked secrets header.
 
 
 // ======================================================

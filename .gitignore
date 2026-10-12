@@ -73,3 +73,7 @@ yarn-error.log*
 lerna-debug.log*
 apps/backend/scripts/etl/faculty-map.local.json
 apps/backend/scripts/etl/*.log
+
+# ESP32-C6 per-device credentials
+/ble_device_secrets.h
+/ble_device_registry.local.json
