@@ -2,7 +2,7 @@
 
 ## Tình trạng để báo cáo
 
-Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khuôn mặt trên điện thoại, GPS, BLE ESP32-C6 và cấu hình HTTPS trên EC2. Mã hiện tại đã nối luồng BLE ESP32-C6: app đọc manufacturer data, backend xác thực AES-GCM và kiểm tra beacon/phòng đã đăng ký. Các kiểm thử tự động qua. **Chưa xác nhận điểm danh đầu cuối trên điện thoại, ESP32-C6 và EC2 thật.**
+Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khuôn mặt trên điện thoại, GPS, BLE ESP32-C6 và cấu hình HTTPS trên EC2. Mã hiện tại đã nối luồng BLE ESP32-C6: app đọc manufacturer data, backend xác thực AES-GCM và kiểm tra beacon/phòng đã đăng ký. Backend mới đã triển khai lên EC2, các kiểm thử tự động qua. **BLE trên production vẫn tắt vì ESP32-C6 chưa nạp firmware và chưa có khóa thiết bị; chưa xác nhận điểm danh đầu cuối trên thiết bị thật.**
 
 ## Bằng chứng đã kiểm tra
 
@@ -10,6 +10,7 @@ Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khu
 | --- | --- |
 | GitHub `main` trước đợt cập nhật | Commit `7236c0f`, 01/09/2026 13:29 ICT |
 | Các cập nhật GitHub ngày 13/10 | `3bc899b` thêm bản thiết kế HTML/ảnh giảng viên; phần BLE/mobile face ở các commit `d48ac6f` và `1d5b783` |
+| Mã backend triển khai từ GitHub `main` | Commit `ae4e434` ngày 13/10/2026; mã này đã được dùng để build backend trên EC2 |
 | Nhánh firmware ESP32-C6 | Commit `408626f`, 10/09/2026 02:16 ICT; đã tích hợp giao thức vào app/API và chuyển khóa thiết bị ra file riêng |
 | Backend | Build thành công; 18/18 suite, 74/74 test qua |
 | Flutter | `flutter analyze` không có lỗi; 33/33 test qua |
@@ -18,7 +19,10 @@ Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khu
 | Firmware ESP32-C6 | Arduino CLI/core ESP32 3.3.11 biên dịch thành công cho `esp32:esp32:esp32c6`; 55% flash, 5% RAM tĩnh; chưa nạp board |
 | Model di động | Face Landmarker và OpenCV SFace được kiểm tra SHA-256; script tải/cài lại được cho bản clone |
 | API AWS công khai | `https://18-143-149-146.nip.io/health` trả HTTP 200 `{"status":"ok"}` |
-| SSH/triển khai EC2 | Cổng 22 còn timeout tại thời điểm rà soát; chưa đọc được cấu hình, container, migration và dữ liệu đang chạy |
+| SSH/triển khai EC2 | Đã thêm SSH 22 chỉ cho IP máy hiện tại `1.53.101.245/32` vào `smartattendance-sg`, SSH thành công. Đã sao lưu PostgreSQL và mã cũ; build và chạy backend từ `ae4e434`. Backend, Caddy, PostgreSQL đều `healthy` |
+| Migration EC2 | 13 migration trên mỗi database, cả 5 database đều không còn migration chờ áp dụng |
+| Kiểm tra API sau triển khai | HTTPS `/health` trả HTTP 200 `{"status":"ok"}`; `/students/profile` không có token trả HTTP 401 như mong đợi |
+| Trạng thái dữ liệu và cờ tính năng | `MOBILE_FACE_AUTH_ENABLED=true`, có 2 bản ghi `MobileFaceIdentity` đang hoạt động trong `attendance_db`; database này hiện có 0 phiên và 0 bản ghi điểm danh. `ATTENDANCE_REQUIRE_BLE=false`; chưa có `BLE_C6_DEVICES_JSON` |
 | Thiết bị thật | Chưa nạp firmware mới và chưa đo BLE/camera/GPS/điểm danh trên máy thật |
 
 Người dùng chỉ cần APK thử nghiệm; bản profile được ký bằng Android Debug để cài thử, không phải gói phát hành. Các bài test dùng mock và mã hóa token tổng hợp, nên không thay thế thử nghiệm phần cứng. Hiện ADB không thấy điện thoại kết nối.
@@ -33,10 +37,10 @@ Bản APK profile để thử demo trên máy Android arm64: `dist/smartattendan
 
 ## Điều kiện còn thiếu trước khi công bố sẵn sàng
 
-1. Nạp firmware mới và khóa riêng vào ESP32-C6, đăng ký chính xác `beaconId`/`roomId`/`keyHex` trên EC2. Chưa có việc này thì backend sẽ từ chối điểm danh BLE.
-2. Mở SSH tới EC2, sao lưu database, kiểm tra cấu hình hiện hành, migration và phiên bản đang chạy trước khi cập nhật. Đã xác nhận riêng `/health` nhưng chưa xác nhận chức năng điểm danh.
+1. Nạp firmware mới và khóa riêng vào ESP32-C6, đăng ký chính xác `beaconId`/`roomId`/`keyHex` trên EC2. Chưa có việc này thì chưa thể xác thực tín hiệu BLE của thiết bị thật.
+2. Khi board đã nạp firmware và registry đã cấu hình, chuyển `ATTENDANCE_REQUIRE_BLE=true` rồi thử token hợp lệ/sai phòng/bị sửa trên AWS. Không bật cờ này trước thời điểm đó vì backend mới sẽ từ chối khởi động nếu registry rỗng.
 3. Cài APK profile lên điện thoại Android arm64, thử phiên mở → nhận diện mặt → quét BLE/GPS → ghi điểm danh → xem lịch sử; thử phòng sai, token sửa và điểm danh trùng. Chưa thể thử BLE thật vì ESP32-C6 chưa được nạp firmware.
-4. Xác nhận mẫu SFace đã nạp cho tài khoản demo và `MOBILE_FACE_AUTH_ENABLED=true` trên backend.
+4. Xác nhận tài khoản demo nằm trong 2 mẫu SFace đã có trên `attendance_db`, hoặc enroll tài khoản cần dùng. Chưa có phiên điểm danh thực tế để đối chiếu dữ liệu đầu cuối.
 
 ## Giới hạn bảo mật cần nói đúng
 
@@ -44,4 +48,4 @@ Firmware ESP32-C6 hiện chưa có thời gian tuyệt đối trong token. AES-G
 
 ## Câu trình bày ngắn
 
-“Phần mềm đã có luồng quản lý lịch, mở phiên và ghi nhận điểm danh, xác minh khuôn mặt trên điện thoại, GPS và token BLE ESP32-C6 được API xác thực bằng AES-GCM. Backend, Flutter và APK Android thử nghiệm đã qua kiểm thử kỹ thuật. Bước cuối trước khi vận hành là nạp khóa cho beacon, triển khai cấu hình lên EC2 và thử toàn bộ luồng trên thiết bị thật.”
+“Phần mềm đã có luồng quản lý lịch, mở phiên và ghi nhận điểm danh, xác minh khuôn mặt trên điện thoại, GPS và token BLE ESP32-C6 được API xác thực bằng AES-GCM. Backend bản 13/10 đã triển khai lên EC2 và hoạt động qua HTTPS; Flutter và APK Android thử nghiệm đã qua kiểm thử kỹ thuật. BLE trên production đang chờ nạp firmware, đăng ký khóa beacon và thử toàn bộ luồng trên thiết bị thật.”
