@@ -11,7 +11,7 @@ Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khu
 | GitHub `main` trước đợt cập nhật | Commit `7236c0f`, 01/09/2026 13:29 ICT |
 | Các cập nhật GitHub ngày 13/10 | `3bc899b` thêm bản thiết kế HTML/ảnh giảng viên; phần BLE/mobile face ở các commit `d48ac6f` và `1d5b783` |
 | Mã backend triển khai từ GitHub `main` | Commit `ae4e434` ngày 13/10/2026; mã này đã được dùng để build backend trên EC2 |
-| Nhánh firmware ESP32-C6 | Commit `408626f`, 10/09/2026 02:16 ICT; đã tích hợp giao thức vào app/API và chuyển khóa thiết bị ra file riêng |
+| Nhánh firmware ESP32-C6 | Bản cũ `408626f` ngày 10/09/2026; đầu nhánh đã cập nhật lên `7298903` ngày 13/10, bỏ khóa AES khỏi sketch và thêm script tạo khóa riêng. Khóa cũ vẫn nằm trong lịch sử Git, tuyệt đối không dùng lại |
 | Backend | Build thành công; 18/18 suite, 74/74 test qua |
 | Flutter | `flutter analyze` không có lỗi; 33/33 test qua |
 | Python Face Auth và ETL | 25/25 và 20/20 test qua ở lần rà soát trước |
@@ -22,6 +22,7 @@ Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khu
 | SSH/triển khai EC2 | Đã thêm SSH 22 chỉ cho IP máy hiện tại `1.53.101.245/32` vào `smartattendance-sg`, SSH thành công. Đã sao lưu PostgreSQL và mã cũ; build và chạy backend từ `ae4e434`. Backend, Caddy, PostgreSQL đều `healthy` |
 | Migration EC2 | 13 migration trên mỗi database, cả 5 database đều không còn migration chờ áp dụng |
 | Kiểm tra API sau triển khai | HTTPS `/health` trả HTTP 200 `{"status":"ok"}`; `/students/profile` không có token trả HTTP 401 như mong đợi |
+| Bộ xác thực BLE trên image AWS | Trong container tách biệt với khóa thử dùng một lần: nhận token AES-GCM hợp lệ; từ chối token bị sửa, sai khóa và sai định dạng. Chưa kiểm thử bằng board thật |
 | Trạng thái dữ liệu và cờ tính năng | `MOBILE_FACE_AUTH_ENABLED=true`, có 2 bản ghi `MobileFaceIdentity` đang hoạt động trong `attendance_db`; database này hiện có 0 phiên và 0 bản ghi điểm danh. `ATTENDANCE_REQUIRE_BLE=false`; chưa có `BLE_C6_DEVICES_JSON` |
 | Thiết bị thật | Chưa nạp firmware mới và chưa đo BLE/camera/GPS/điểm danh trên máy thật |
 

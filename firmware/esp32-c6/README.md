@@ -1,8 +1,10 @@
 # ESP32-C6 BLE beacon
 
-This sketch is based on the repository's `add-esp32-c6-firmware` branch (latest
-commit 10 September 2026). It broadcasts a 26-byte AES-128-GCM token in
-manufacturer data (company ID `0xffff`) every 30 seconds. The Flutter app
+The `add-esp32-c6-firmware` branch was refreshed on 13 October 2026 to remove
+the embedded AES key from its current sketch. Older commits on that branch
+still contain the old key; never use it for a device. This sketch broadcasts a
+26-byte AES-128-GCM token in manufacturer data (company ID `0xffff`) every
+30 seconds. The Flutter app
 forwards that token to NestJS; only NestJS holds the per-device AES key and maps
 the device ID to a classroom.
 
