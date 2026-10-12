@@ -9,6 +9,7 @@ Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khu
 | Hạng mục | Kết quả |
 | --- | --- |
 | GitHub `main` trước đợt cập nhật | Commit `7236c0f`, 01/09/2026 13:29 ICT |
+| Mã mới trên GitHub `main` | Commit tích hợp `d48ac6f` đã push; gồm BLE ESP32-C6, mobile face, migration và hướng dẫn triển khai |
 | Nhánh firmware ESP32-C6 | Commit `408626f`, 10/09/2026 02:16 ICT; đã tích hợp giao thức vào app/API và chuyển khóa thiết bị ra file riêng |
 | Backend | Build thành công; 18/18 suite, 72/72 test qua |
 | Flutter | `flutter analyze` không có lỗi; 33/33 test qua |
@@ -20,6 +21,8 @@ Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khu
 | Thiết bị thật | Chưa nạp firmware mới và chưa đo BLE/camera/GPS/điểm danh trên máy thật |
 
 APK profile chỉ dùng kiểm thử. APK release còn thiếu keystore phát hành. Các bài test dùng mock và mã hóa token tổng hợp, nên không thay thế thử nghiệm phần cứng.
+
+Bản APK profile để thử demo trên máy Android arm64: `dist/smartattendance-v1.0.13-arm64-profile-ble-c6.apk` (117.900.131 byte, SHA-256 `036a4a8d345e4d7ac687570ffe8ee7e939dd1dff68592011e451b3dc5503a01e`). File này ở máy build, không đưa vào GitHub.
 
 ## Thay đổi quan trọng
 
