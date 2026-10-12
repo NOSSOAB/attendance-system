@@ -1,0 +1,162 @@
+<!DOCTYPE html><html lang="vi" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Thẻ giảng viên điện tử - HUCE SA</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<style>
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background-color: #F0F4F9;
+      color: #0F172A;
+      -webkit-font-smoothing: antialiased;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 1;
+    }
+    .material-symbols-outlined.fill-1 {
+      font-variation-settings: 'FILL' 1;
+    }
+    .card-pattern-overlay {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1.5px, transparent 1.5px);
+      background-size: 14px 14px;
+    }
+    .chip-lines {
+      background: linear-gradient(90deg, #d4af37 0%, #f9e8a2 50%, #b8932b 100%);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 flex justify-center min-h-screen">
+<div class="w-full max-w-[430px] min-h-screen bg-[#F0F4F9] flex flex-col relative pb-28 shadow-xl overflow-x-hidden">
+<!-- Header vòm xanh dương đặc trưng HUCE SA -->
+<header class="relative bg-gradient-to-b from-[#165DFF] via-[#0D52E8] to-[#004BE0] text-white pt-11 pb-16 px-5 rounded-b-[2.25rem] shadow-md z-10">
+<!-- Background pattern decor -->
+<div class="absolute inset-0 opacity-10 card-pattern-overlay pointer-events-none rounded-b-[2.25rem]"></div>
+<div class="absolute -right-8 -top-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+<!-- Header actions bar -->
+<div class="relative z-10 flex items-center justify-between"><div class="flex items-center gap-3">
+<button aria-label="Quay lại" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md flex items-center justify-center transition-all active:scale-95 text-white">
+<span class="material-symbols-outlined text-2xl">arrow_back</span>
+</button>
+<h1 class="text-base font-bold tracking-tight text-white leading-snug">Thẻ giảng viên điện tử</h1>
+</div></div>
+</header>
+<!-- Main Content Area (Kéo nổi lên đè nhẹ lên Header) -->
+<main class="flex-1 px-4 -mt-10 space-y-4 z-20"><!-- Thẻ Giảng Viên Điện Tử Tối Giản & Thanh Lịch -->
+<div class="space-y-4">
+  <div class="relative rounded-3xl bg-gradient-to-br from-[#165DFF] via-[#1253E8] to-[#083cb8] text-white p-5 shadow-xl shadow-blue-900/20 border border-white/20 overflow-hidden">
+    <!-- Chìm họa tiết an ninh & ánh sáng nền -->
+    <div class="absolute inset-0 card-pattern-overlay opacity-25 pointer-events-none"></div>
+    <div class="absolute -right-12 -top-12 w-48 h-48 rounded-full bg-cyan-400/20 blur-3xl pointer-events-none"></div>
+    <div class="absolute -left-10 -bottom-10 w-40 h-40 rounded-full bg-blue-300/15 blur-2xl pointer-events-none"></div>
+
+    <!-- Header thẻ: Logo & Huy hiệu xác thực -->
+    <div class="relative z-10 flex items-center justify-between pb-3.5 border-b border-white/15">
+      <div class="flex items-center">
+        
+        <div>
+          <p class="text-[10px] font-extrabold uppercase tracking-widest text-blue-100">TRƯỜNG ĐẠI HỌC XÂY DỰNG HÀ NỘI</p>
+          <p class="text-[9px] text-white/80 font-medium">Hanoi University of Civil Engineering</p>
+        </div>
+      </div>
+      <span class="inline-flex items-center gap-1 text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-200 shadow-sm">
+        <span class="material-symbols-outlined text-xs fill-1 text-emerald-600">check_circle</span> Hợp lệ
+      </span>
+    </div>
+
+    <!-- Chip từ mô phỏng & Tiêu đề phân loại thẻ -->
+    <div class="relative z-10 flex items-center justify-between py-2.5">
+      <div class="flex items-center gap-2">
+        
+        
+      </div>
+      <span class="text-[10px] uppercase font-bold tracking-wider text-blue-100 bg-white/10 px-2.5 py-0.5 rounded-full border border-white/15">THẺ GIẢNG VIÊN ĐIỆN TỬ</span>
+    </div>
+
+    <!-- Chân dung & Họ tên + MSGV -->
+    <div class="relative z-10 flex items-center gap-4 pt-1 pb-3 border-b border-white/15">
+      <div class="relative flex-shrink-0">
+        <div class="w-20 h-24 rounded-2xl bg-white/10 border-2 border-white shadow-md overflow-hidden p-0.5">
+          <img alt="Avatar TS. Trần Văn Nam" class="w-full h-full object-cover rounded-[14px]" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDHYWkl6Y3v2Re_4PRK5PslZ8UITm2ZuW96268xi8vUsZT9u77mVOyQyYY7EnivhKLdWRzv2x4f02aJ7JTfZsqCBUFnkSquUi5F5FGC5G8CtE2NU-kdJv1nZHC1KPAcALl1n-BxA3h2lkYlDwMGlpGrxraSPm9j89lZZbV3PvbLTUuuKZsGlnDSyfatzXNBdsDqA_7tYQPr0Kmw8-fjBXvS39vIz1o4YR_nXw-4oXvD0BYMFfStfJn8">
+        </div>
+        <span class="absolute -bottom-1 -right-1 w-5 h-5 rounded-full bg-emerald-500 border-2 border-white flex items-center justify-center text-[10px] text-white shadow">
+          <span class="material-symbols-outlined text-xs">verified</span>
+        </span>
+      </div>
+      <div class="flex-1 min-w-0 space-y-1.5">
+        <div>
+          <p class="text-[10px] uppercase font-semibold text-cyan-200 tracking-wider">Giảng viên chính</p>
+          <h2 class="text-lg font-bold text-white tracking-tight truncate uppercase">TS. TRẦN VĂN NAM</h2>
+        </div>
+        <div class="inline-flex items-center gap-1.5 bg-white/15 px-2.5 py-1 rounded-lg border border-white/20">
+          <span class="text-[10px] text-blue-200 font-medium">MSGV:</span>
+          <span class="font-mono text-xs font-extrabold text-white tracking-wider">GV0842</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Thông tin chi tiết được chuẩn hóa theo đúng yêu cầu -->
+    <div class="relative z-10 pt-3 space-y-2 text-xs">
+      <div class="flex items-center justify-between py-1 border-b border-white/10">
+        <span class="text-blue-100 font-medium text-[11px]">Ngày sinh:</span>
+        <span class="font-bold text-white tracking-wide text-[12px]">15/08/1982</span>
+      </div>
+      <div class="flex items-start justify-between py-1 border-b border-white/10 gap-2">
+        <span class="text-blue-100 font-medium text-[11px] flex-shrink-0">Khoa:</span>
+        <span class="font-bold text-white text-right text-[12px]">Xây dựng Dân dụng &amp; Công nghiệp</span>
+      </div>
+      <div class="flex items-start justify-between py-1 border-b border-white/10 gap-2">
+        <span class="text-blue-100 font-medium text-[11px] flex-shrink-0">Bộ môn:</span>
+        <span class="font-bold text-white text-right text-[12px]">Kết cấu Công trình</span>
+      </div>
+      <div class="flex items-center justify-between py-1">
+        <span class="text-blue-100 font-medium text-[11px]">Lớp quản lý:</span>
+        <span class="font-extrabold text-cyan-200 bg-white/10 px-2 py-0.5 rounded text-[12px] border border-white/20">65KD1</span>
+      </div>
+    </div>
+
+    <!-- Dải bảo mật chân thẻ tinh tế -->
+    <div class="relative z-10 mt-3 pt-2.5 border-t border-white/15 flex items-center justify-between text-[10px] text-blue-100">
+      <div class="flex items-center gap-1.5">
+        <span class="material-symbols-outlined text-xs text-emerald-400">shield</span>
+        <span class="">Thẻ định danh bảo mật điện tử</span>
+      </div>
+      <span class="font-mono tracking-widest text-[9px] opacity-75">HUCE•ID•SECURE</span>
+    </div>
+  </div>
+
+  <!-- Card thông tin bảo mật tối giản thanh lịch phía dưới -->
+  <div class="bg-white rounded-2xl p-3.5 border border-slate-100 shadow-sm flex items-center justify-center gap-2 text-[11px] text-slate-500">
+    <span class="material-symbols-outlined text-sm text-[#165DFF]">lock</span>
+    <span class="">Dữ liệu thẻ được xác thực trực tiếp bởi Cổng thông tin HUCE SA</span>
+  </div>
+</div></main>
+<!-- Bottom Navigation Bar (Đồng bộ chuẩn 4 tab ứng dụng Giảng viên HUCE SA) -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-md mx-auto bg-white border-t border-slate-200 py-2.5 px-6 flex justify-around items-center z-50 shadow-lg">
+<a class="flex flex-col items-center text-slate-500 hover:text-slate-700 transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">home</span>
+<span class="text-[10px] font-medium mt-0.5">Trang chủ</span>
+</a>
+<a class="flex flex-col items-center text-slate-500 hover:text-slate-700 transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">calendar_month</span>
+<span class="text-[10px] font-medium mt-0.5">Lịch</span>
+</a>
+<a class="flex flex-col items-center text-slate-500 hover:text-slate-700 transition-colors" href="#">
+<span class="material-symbols-outlined text-2xl">qr_code_scanner</span>
+<span class="text-[10px] font-medium mt-0.5">Điểm danh</span>
+</a>
+<a class="flex flex-col items-center text-[#165DFF]" href="#">
+<span class="material-symbols-outlined text-2xl fill-1">person</span>
+<span class="text-[10px] font-semibold mt-0.5">Hồ sơ</span>
+</a>
+</nav>
+</div>
+
+
+</body></html>

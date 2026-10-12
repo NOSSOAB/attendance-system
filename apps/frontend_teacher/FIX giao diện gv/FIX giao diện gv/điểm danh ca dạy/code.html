@@ -1,0 +1,298 @@
+<!DOCTYPE html><html lang="vi" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Điểm danh ca dạy - Giảng viên HUCE</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Be Vietnam Pro & Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#165DFF',
+              dark: '#0E42D2',
+              light: '#EBF2FF',
+              50: '#F2F7FF',
+            }
+          },
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<style>
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-[#F4F6FB] text-slate-800 antialiased min-h-screen flex justify-center selection:bg-brand/20">
+<!-- Mobile Frame (390px portrait) -->
+<div class="w-full max-w-[390px] min-h-screen bg-[#F4F6FB] flex flex-col relative shadow-2xl pb-28">
+<!-- Curved Royal Blue Header -->
+<header class="bg-[#165DFF] text-white pt-10 pb-7 px-5 rounded-b-[30px] shadow-lg shadow-blue-500/15 relative z-20">
+<!-- Top Bar with Back & Action -->
+<div class="flex items-center justify-between"><div class="flex items-center gap-3">
+<button class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition active:scale-95">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+</button>
+<h1 class="text-lg font-bold text-white tracking-tight">Điểm danh ca dạy</h1>
+</div>
+<button class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-sm flex items-center justify-center text-white transition active:scale-95 relative" title="Thông báo"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-1 right-1 w-2 h-2 rounded-full bg-rose-500 border border-white"></span></button></div>
+</header>
+<!-- Main Content -->
+<main class="p-4 space-y-4 flex-1 -mt-3 relative z-20">
+<!-- Class Info Card -->
+<div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3">
+<div class="flex items-start justify-between gap-2">
+<div class="min-w-0">
+<div class="flex items-center gap-1.5 flex-wrap mb-1">
+<span class="px-2 py-0.5 rounded-md bg-blue-50 text-[#165DFF] font-bold text-[10px] uppercase border border-blue-100">65KD1</span>
+<span class="text-[11px] font-medium text-slate-500">• 62 SV • P.302-H1</span>
+</div>
+<h2 class="text-sm font-bold text-slate-900 leading-snug">Kết cấu Bê tông Cốt thép 1</h2>
+</div>
+<div class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-600 shrink-0">
+<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+<span class="text-[10px] font-bold">Đang mở</span>
+</div>
+</div>
+<!-- Attendance Progress Bar -->
+<div class="pt-1">
+<div class="flex items-center justify-between text-xs mb-1.5">
+<span class="text-slate-500 font-medium text-[11px]">Tiến độ điểm danh</span>
+<span class="font-bold text-slate-900 text-[11px]"><strong class="text-[#165DFF]">54</strong>/62 SV <span class="text-slate-400 font-normal">(87.1%)</span></span>
+</div>
+<div class="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+<div class="h-full bg-[#165DFF] rounded-full transition-all duration-500" style="width: 87.1%"></div>
+</div>
+</div>
+</div>
+<!-- QR Code & BLE Area -->
+<div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex flex-col items-center">
+<div class="w-full flex items-center justify-between text-xs mb-3">
+<span class="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+<span class="material-symbols-outlined text-[#165DFF] text-[18px]">sensors</span>
+          Mã QR động &amp; BLE
+        </span>
+<div class="flex items-center gap-1 text-[10px] font-semibold text-slate-500 bg-slate-50 border border-slate-200 px-2 py-0.5 rounded-full">
+<span class="material-symbols-outlined text-[12px] text-[#165DFF] animate-spin">sync</span>
+<span class="">Đổi sau <strong class="text-[#165DFF] font-mono">15s</strong></span>
+</div>
+</div>
+<!-- QR Visual -->
+<div class="w-44 h-44 bg-[#F8FAFC] border-2 border-dashed border-blue-200 rounded-2xl flex flex-col items-center justify-center p-2.5 relative group shadow-inner">
+<svg class="w-36 h-36 text-slate-900" viewBox="0 0 100 100">
+<path d="M0 0h30v30H0zm4 4h22v22H4zm4 4h14v14H8zM70 0h30v30H70zm4 4h22v22H74zm4 4h14v14H78zM0 70h30v30H0zm4 4h22v22H4zm4 4h14v14H8zM40 0h10v20H40zm15 10h10v15H55zm-15 20h20v10H40zm30 10h10v10H70zm15 5h15v10H85zm-45 15h15v10H40zm25 0h10v20H65zm-10 15h15v15H55zm35 0h10v30H90zm-15 15h10v15H75zm-35 5h15v10H40zm-30-25h10v10H10zm0 15h10v10H10z" fill="currentColor"></path>
+<circle cx="50" cy="50" fill="white" r="10" stroke="#165DFF" stroke-width="2"></circle>
+<text fill="#165DFF" font-family="sans-serif" font-size="6.5" font-weight="bold" text-anchor="middle" x="50" y="53">HUCE</text>
+</svg>
+</div>
+<!-- Emergency OTP Code -->
+<div class="mt-2.5 flex items-center gap-1.5">
+<span class="text-[11px] text-slate-500 font-medium">Mã PIN dự phòng:</span>
+<span class="px-2.5 py-0.5 rounded bg-blue-50 text-[#165DFF] font-mono font-bold text-xs border border-blue-200 tracking-wider whitespace-nowrap inline-block">8492</span>
+</div>
+<!-- Action Buttons for QR -->
+<div class="grid grid-cols-2 gap-2 w-full mt-3.5">
+<button class="flex items-center justify-center gap-1 py-2 px-3 rounded-xl bg-blue-50 hover:bg-blue-100 text-[#165DFF] text-xs font-bold transition active:scale-95 border border-blue-100">
+<span class="material-symbols-outlined text-[16px]">fullscreen</span>
+<span class="">Phóng to máy chiếu</span>
+</button>
+<button class="flex items-center justify-center gap-1 py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold transition active:scale-95 border border-slate-200">
+<span class="material-symbols-outlined text-[16px]">pause_circle</span>
+<span class="">Tạm dừng</span>
+</button>
+</div>
+</div>
+<!-- Student Categorization Tabs -->
+<div class="grid grid-cols-3 gap-1.5 p-1 bg-slate-200/60 rounded-xl"><button class="py-1.5 text-center text-xs font-bold rounded-lg bg-[#165DFF] text-white shadow-sm transition">
+        Đã có mặt (54)
+      </button>
+<button class="py-1.5 text-center text-xs font-medium rounded-lg text-slate-600 hover:text-slate-900 transition">
+        Cảnh báo (02)
+      </button>
+<button class="py-1.5 text-center text-xs font-medium rounded-lg text-slate-600 hover:text-slate-900 transition">
+        Chưa có mặt (06)
+      </button></div>
+<!-- Exception List (Cảnh báo BLE/GPS cần duyệt) -->
+<div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+<h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">Danh sách đã điểm danh (54 SV)</h3>
+</div>
+<span class="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">54/62 có mặt</span>
+</div>
+<!-- Search Bar -->
+<div class="relative flex items-center">
+<span class="material-symbols-outlined absolute left-3 text-slate-400 text-[18px]">search</span>
+<input class="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#165DFF]" placeholder="Tìm theo tên hoặc MSV..." type="text">
+</div>
+<!-- List of Present Students -->
+<div class="space-y-2.5 max-h-72 overflow-y-auto pr-0.5">
+<!-- Student 1 -->
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 hover:border-slate-200 transition">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-blue-50 text-[#165DFF] font-bold text-xs flex items-center justify-center shrink-0 border border-blue-100">
+          VA
+        </div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<p class="text-xs font-bold text-slate-900 truncate">Trần Văn An</p>
+<span class="text-[10px] text-slate-500 font-mono">• 2021005</span>
+</div>
+<p class="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-emerald-600">schedule</span>
+<span class="">07:31</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-600">QR Code + BLE</span>
+</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold shrink-0"><span class="material-symbols-outlined text-[12px]">check_circle</span>Hợp lệ</span>
+</div>
+<!-- Student 2 -->
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 hover:border-slate-200 transition">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-blue-50 text-[#165DFF] font-bold text-xs flex items-center justify-center shrink-0 border border-blue-100">
+          LM
+        </div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<p class="text-xs font-bold text-slate-900 truncate">Lê Thị Mai</p>
+<span class="text-[10px] text-slate-500 font-mono">• 2021012</span>
+</div>
+<p class="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-emerald-600">schedule</span>
+<span class="">07:32</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-600">QR Code + BLE</span>
+</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold shrink-0"><span class="material-symbols-outlined text-[12px]">check_circle</span>Hợp lệ</span>
+</div>
+<!-- Student 3 -->
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 hover:border-slate-200 transition">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-blue-50 text-[#165DFF] font-bold text-xs flex items-center justify-center shrink-0 border border-blue-100">
+          HD
+        </div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<p class="text-xs font-bold text-slate-900 truncate">Hoàng Minh Đức</p>
+<span class="text-[10px] text-slate-500 font-mono">• 2021018</span>
+</div>
+<p class="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-emerald-600">schedule</span>
+<span class="">07:33</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-600">Mã PIN dự phòng</span>
+</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold shrink-0"><span class="material-symbols-outlined text-[12px]">check_circle</span>Hợp lệ</span>
+</div>
+<!-- Student 4 -->
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 hover:border-slate-200 transition">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-blue-50 text-[#165DFF] font-bold text-xs flex items-center justify-center shrink-0 border border-blue-100">
+          QN
+        </div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<p class="text-xs font-bold text-slate-900 truncate">Phạm Quỳnh Nga</p>
+<span class="text-[10px] text-slate-500 font-mono">• 2021025</span>
+</div>
+<p class="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-emerald-600">schedule</span>
+<span class="">07:34</span>
+<span class="text-slate-300">•</span>
+<span class="text-slate-600">QR Code + BLE</span>
+</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold shrink-0"><span class="material-symbols-outlined text-[12px]">check_circle</span>Hợp lệ</span>
+</div>
+<!-- Student 5 -->
+<div class="p-3 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-between gap-2 hover:border-slate-200 transition">
+<div class="flex items-center gap-2.5 min-w-0">
+<div class="w-8 h-8 rounded-full bg-blue-100 text-[#165DFF] font-bold text-xs flex items-center justify-center shrink-0 border border-blue-200">
+          DH
+        </div>
+<div class="min-w-0">
+<div class="flex items-center gap-1.5">
+<p class="text-xs font-bold text-slate-900 truncate">Đỗ Việt Hùng</p>
+<span class="text-[10px] text-slate-500 font-mono">• 2021031</span>
+</div>
+<p class="text-[10px] text-slate-500 mt-0.5 flex items-center gap-1">
+<span class="material-symbols-outlined text-[12px] text-blue-600">schedule</span>
+<span class="">07:35</span>
+<span class="text-slate-300">•</span>
+<span class="text-blue-600 font-medium">Điểm danh bù bởi GV</span>
+</p>
+</div>
+</div>
+<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full bg-blue-50 text-[#165DFF] border border-blue-200 text-[10px] font-semibold shrink-0">
+<span class="material-symbols-outlined text-[12px]">how_to_reg</span>
+Điểm danh bù
+      </span>
+</div>
+</div>
+</div>
+<!-- Final Primary Action Button -->
+<div class="pt-1 pb-2">
+<button class="w-full bg-[#165DFF] hover:bg-blue-700 text-white font-semibold py-3 px-4 flex items-center justify-center gap-2 shadow-md shadow-blue-500/20 transition active:scale-[0.98] rounded-2xl">
+<span class="material-symbols-outlined text-[19px]">task_alt</span>
+<span class="text-xs font-bold">Chốt điểm danh &amp; Lưu sổ điểm</span>
+</button>
+<p class="text-center text-[10px] text-slate-400 mt-1.5">Hệ thống tự động đồng bộ lên Cổng thông tin HUCE</p>
+</div>
+</main>
+<!-- Fixed Bottom Navigation -->
+<nav class="fixed bottom-0 left-0 right-0 max-w-[390px] mx-auto bg-white/95 backdrop-blur-md border-t border-slate-200 z-50 px-3 py-2 flex items-center justify-around shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
+  <a href="#" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition flex-1 py-1">
+    <span class="material-symbols-outlined text-[22px]">home</span>
+    <span class="text-[10px] font-medium tracking-tight">Trang chủ</span>
+  </a>
+  <a href="#" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition flex-1 py-1">
+    <span class="material-symbols-outlined text-[22px]">calendar_month</span>
+    <span class="text-[10px] font-medium tracking-tight">Lịch</span>
+  </a>
+  <a href="#" class="flex flex-col items-center gap-1 text-[#165DFF] transition flex-1 py-1 relative font-semibold">
+    <span class="material-symbols-outlined fill text-[22px]">qr_code_scanner</span>
+    <span class="text-[10px] font-bold tracking-tight">Điểm danh</span>
+  </a>
+  <a href="#" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition flex-1 py-1">
+    <span class="material-symbols-outlined text-[22px]">person</span>
+    <span class="text-[10px] font-medium tracking-tight">Hồ sơ</span>
+  </a>
+</nav>
+</div>
+
+
+</body></html>

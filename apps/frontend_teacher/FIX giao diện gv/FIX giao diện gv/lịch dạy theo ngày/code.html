@@ -1,0 +1,246 @@
+<!DOCTYPE html><html lang="vi" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Lịch giảng dạy - Giảng viên HUCE SA</title>
+<!-- Tailwind CSS v3 with Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Be Vietnam Pro & Material Symbols Outlined -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
+<!-- Tailwind Custom Config -->
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#165DFF',
+              dark: '#0E42D2',
+              light: '#EBF2FF',
+              50: '#F2F7FF',
+            }
+          },
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+<!-- Global Custom Styles -->
+<style data-purpose="global-styles">
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+</style>
+</head>
+<body class="bg-[#F8FAFC] text-slate-800 antialiased min-h-screen flex justify-center selection:bg-brand/20">
+<!-- Mobile Device Shell Frame -->
+<div class="w-full max-w-[430px] min-h-screen bg-[#F8FAFC] flex flex-col relative shadow-2xl pb-28">
+<!-- BEGIN: HeaderSection -->
+<header class="bg-[#165DFF] rounded-b-[36px] px-4 text-white relative shadow-lg pb-8 pt-12" data-purpose="schedule-header"><div class="flex items-center justify-between gap-2 mb-4"><div class="flex items-center space-x-2.5 flex-1 min-w-0"><button aria-label="Quay lại" class="w-9 h-9 rounded-full bg-white/20 border border-white/25 flex items-center justify-center backdrop-blur-md active:scale-95 transition-transform shrink-0"><span class="material-symbols-outlined text-[20px] text-white">arrow_back_ios_new</span></button><div class="flex flex-col min-w-0"><h1 class="text-base font-bold text-white tracking-tight leading-snug">Lịch giảng dạy</h1><span class="text-[11px] text-blue-100 font-medium leading-tight mt-0.5 opacity-90">Học kỳ 2 • Năm học 2024 - 2025</span></div></div><div class="flex items-center shrink-0"><button aria-label="Thông báo" class="relative w-9 h-9 rounded-full bg-white/20 border border-white/25 flex items-center justify-center text-white backdrop-blur-sm active:scale-95 transition-transform shrink-0"><span class="material-symbols-outlined text-[20px] text-white">notifications</span><span class="absolute top-2 right-2 w-2 h-2 bg-rose-500 rounded-full ring-2 ring-[#165DFF]"></span></button></div></div><div class="bg-white/20 p-1 rounded-2xl flex items-center justify-between text-xs font-semibold backdrop-blur-md border border-white/25 shadow-inner"><button class="flex-1 py-1.5 text-center rounded-xl bg-white text-[#165DFF] shadow-sm font-bold transition-all">Ngày</button><button class="flex-1 py-1.5 text-center rounded-xl text-white/90 hover:text-white transition-all font-semibold">Tuần</button><button class="flex-1 py-1.5 text-center rounded-xl text-white/90 hover:text-white transition-all font-semibold">Tháng</button></div></header>
+<!-- END: HeaderSection -->
+<!-- BEGIN: MainContent -->
+<main class="px-4 space-y-3.5 relative z-10 -mt-4" data-purpose="schedule-body"><section class="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 space-y-3.5"><div class="flex items-center justify-between px-1 text-slate-800"><button aria-label="Ngày trước" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 active:scale-90 transition-all"><span class="material-symbols-outlined text-[18px]">chevron_left</span></button><div class="text-center"><div class="text-sm font-bold text-slate-800 tracking-tight flex items-center gap-1.5 justify-center"><span class="material-symbols-outlined text-[16px] text-[#165DFF]">event</span><span class="">Thứ Năm, 24/04/2026</span></div><span class="text-[10px] text-slate-500 font-medium block mt-0.5">Tuần 24</span></div><button aria-label="Ngày sau" class="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-600 active:scale-90 transition-all"><span class="material-symbols-outlined text-[18px]">chevron_right</span></button></div><div class="grid grid-cols-7 gap-1 pt-2 border-t border-slate-100 text-center"><button class="py-1.5 rounded-xl flex flex-col items-center hover:bg-slate-50 transition"><span class="text-[9px] uppercase font-semibold text-slate-400">Th 2</span><span class="text-xs font-bold text-slate-700 mt-0.5">21</span><span class="w-1.5 h-1.5 bg-blue-300 rounded-full mt-1"></span></button><button class="py-1.5 rounded-xl flex flex-col items-center hover:bg-slate-50 transition"><span class="text-[9px] uppercase font-semibold text-slate-400">Th 3</span><span class="text-xs font-bold text-slate-700 mt-0.5">22</span><span class="w-1.5 h-1.5 bg-blue-300 rounded-full mt-1"></span></button><button class="py-1.5 rounded-xl flex flex-col items-center hover:bg-slate-50 transition"><span class="text-[9px] uppercase font-semibold text-slate-400">Th 4</span><span class="text-xs font-bold text-slate-700 mt-0.5">23</span><span class="w-1.5 h-1.5 bg-transparent rounded-full mt-1"></span></button><button class="py-1.5 rounded-xl flex flex-col items-center bg-[#165DFF] text-white shadow-md font-bold"><span class="text-[9px] uppercase font-extrabold text-white/90">Th 5</span><span class="text-xs font-black text-white mt-0.5">24</span><span class="w-1.5 h-1.5 bg-white rounded-full mt-1"></span></button><button class="py-1.5 rounded-xl flex flex-col items-center hover:bg-slate-50 transition"><span class="text-[9px] uppercase font-semibold text-slate-400">Th 6</span><span class="text-xs font-bold text-slate-700 mt-0.5">25</span><span class="w-1.5 h-1.5 bg-blue-300 rounded-full mt-1"></span></button><button class="py-1.5 rounded-xl flex flex-col items-center hover:bg-slate-50 transition"><span class="text-[9px] uppercase font-semibold text-slate-400">Th 7</span><span class="text-xs font-bold text-slate-700 mt-0.5">26</span><span class="w-1.5 h-1.5 bg-transparent rounded-full mt-1"></span></button><button class="py-1.5 rounded-xl flex flex-col items-center hover:bg-slate-50 transition"><span class="text-[9px] uppercase font-semibold text-slate-400">CN</span><span class="text-xs font-bold text-slate-700 mt-0.5">27</span><span class="w-1.5 h-1.5 bg-transparent rounded-full mt-1"></span></button></div></section>
+<!-- Date & Event Count Divider Badge (Th 5, 24/04 | 2 ca dạy + 1 ca thi) -->
+<div class="flex items-center gap-3 pt-1">
+<div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#165DFF] text-white text-xs font-bold shadow-sm shrink-0">
+<span class="material-symbols-outlined text-[15px]">event_note</span>
+<span class="">Th 5, 24/04 | 2 ca dạy</span>
+</div>
+<div class="h-0.5 bg-blue-200 flex-1 rounded-full"></div>
+</div>
+<!-- SESSION CARDS LIST -->
+<div class="space-y-3.5">
+<!-- Card 1: ACTIVE / ONGOING (ĐANG DIỄN RA) -->
+<div class="bg-white rounded-2xl p-4 shadow-sm border-2 border-emerald-400 relative overflow-hidden" data-purpose="class-card-ongoing">
+<!-- Accent bar -->
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-emerald-500"></div>
+<!-- Top Row Badges -->
+<div class="flex items-center justify-between mb-2.5"><span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#165DFF] border border-blue-200 text-[11px] font-bold whitespace-nowrap">Ca 1 • Tiết 1 - 3</span><div class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold border border-emerald-200"><span class="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span><span class="">ĐANG DIỄN RA</span></div></div>
+<!-- Subject & Class Details -->
+<div>
+<h3 class="text-base font-bold text-slate-900 leading-snug">Kết cấu Bê tông Cốt thép 1</h3>
+<p class="text-xs text-slate-500 font-medium mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+<span class="">Mã HP: <strong class="text-slate-800">XD201</strong></span>
+<span class="">•</span>
+<span class="">Lớp HP: <strong class="text-slate-800">65KD1</strong></span>
+<span class="">•</span>
+<span class="">Sĩ số: <strong class="text-slate-800">62 SV</strong></span>
+<span class="">•</span>
+<span class="text-blue-700 font-semibold">3 Tín chỉ</span>
+</p>
+</div>
+<!-- Time & Room Info Grid -->
+<div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+<div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200/80 flex items-center">
+<span class="material-symbols-outlined text-[18px] text-[#165DFF] mr-2 shrink-0">schedule</span>
+<div>
+<p class="text-[10px] text-slate-400 font-medium leading-none">Thời gian</p>
+<p class="font-bold text-slate-900 mt-0.5">07:30 - 10:15</p>
+</div>
+</div>
+<div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200/80 flex items-center">
+<span class="material-symbols-outlined text-[18px] text-indigo-600 mr-2 shrink-0">location_on</span>
+<div>
+<p class="text-[10px] text-slate-400 font-medium leading-none">Phòng học</p>
+<p class="font-bold text-slate-900 mt-0.5">302-H1 <span class="text-[10px] font-semibold text-slate-500">(Nhà H1)</span></p>
+</div>
+</div>
+</div>
+<!-- Attendance Action Box -->
+<div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
+<span class="text-[11px] text-slate-600 font-semibold flex items-center gap-1.5">
+<span class="material-symbols-outlined text-[16px] text-emerald-600">check_circle</span>
+          Đã điểm danh 58/62 SV
+        </span>
+<button class="bg-[#165DFF] hover:bg-[#0E42D2] text-white text-xs font-bold py-2 px-3.5 rounded-xl flex items-center gap-1.5 shadow-sm active:scale-95 transition">
+<span class="material-symbols-outlined text-[16px]">qr_code_scanner</span>
+<span class="">Điểm danh ngay</span>
+</button>
+</div>
+<!-- Sub link / Detail footnote -->
+<div class="mt-2.5 pt-2 border-t border-dashed border-slate-200 flex items-center justify-between text-[11px] text-slate-500"><span class="text-emerald-700 font-medium text-[11px]">Buổi 10 / 15</span></div>
+</div>
+<!-- Card 2: UPCOMING (SẮP DIỄN RA) -->
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 relative overflow-hidden" data-purpose="class-card-upcoming">
+<!-- Accent bar -->
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-blue-500"></div>
+<!-- Top Row Badges -->
+<div class="flex items-center justify-between mb-2.5"><span class="px-2.5 py-0.5 rounded-full bg-blue-50 text-[#165DFF] border border-blue-200 text-[11px] font-bold whitespace-nowrap">Ca 2 • Tiết 7 - 9</span><span class="px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 text-[11px] font-bold whitespace-nowrap">SẮP DIỄN RA</span></div>
+<!-- Subject & Class Details -->
+<div>
+<h3 class="text-base font-bold text-slate-900 leading-snug">Cơ học Đất &amp; Nền móng</h3>
+<p class="text-xs text-slate-500 font-medium mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+<span class="">Mã HP: <strong class="text-slate-800">XD105</strong></span>
+<span class="">•</span>
+<span class="">Lớp HP: <strong class="text-slate-800">65KD2</strong></span>
+<span class="">•</span>
+<span class="">Sĩ số: <strong class="text-slate-800">58 SV</strong></span>
+<span class="">•</span>
+<span class="text-blue-700 font-semibold">3 Tín chỉ</span>
+</p>
+</div>
+<!-- Time & Room Info Grid -->
+<div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+<div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200 flex items-center">
+<span class="material-symbols-outlined text-[18px] text-slate-600 mr-2 shrink-0">schedule</span>
+<div>
+<p class="text-[10px] text-slate-400 font-medium leading-none">Thời gian</p>
+<p class="font-bold text-slate-900 mt-0.5">13:15 - 15:45</p>
+</div>
+</div>
+<div class="bg-slate-50 rounded-xl p-2.5 border border-slate-200 flex items-center">
+<span class="material-symbols-outlined text-[18px] text-slate-600 mr-2 shrink-0">location_on</span>
+<div>
+<p class="text-[10px] text-slate-400 font-medium leading-none">Phòng học</p>
+<p class="font-bold text-slate-900 mt-0.5">204-A1 <span class="text-[10px] font-semibold text-slate-500">(Nhà A1)</span></p>
+</div>
+</div>
+</div>
+<!-- Action Button / State banner -->
+<div class="mt-3 pt-3 border-t border-slate-100 flex items-center justify-between">
+<span class="text-[11px] text-slate-500 font-medium flex items-center gap-1">
+<span class="material-symbols-outlined text-[15px] text-amber-500">timer</span>
+          Chưa mở điểm danh • Bắt đầu sau 2h30
+        </span>
+<button class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-1.5 px-3 rounded-xl border border-slate-200 active:scale-95 transition">
+          Mở sớm QR
+        </button>
+</div>
+<!-- Sub link -->
+<div class="mt-2.5 pt-2 border-t border-dashed border-slate-200 flex items-center justify-between text-[11px] text-slate-500"><span class="text-slate-500 font-medium text-[11px]">Buổi 08 / 15</span></div>
+</div>
+<!-- Card 3: EXAM SUPERVISION (LỊCH COI THI / ĐÁNH GIÁ - ORANGE THEME) -->
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-amber-200 relative overflow-hidden" data-purpose="class-card-exam">
+<!-- Accent bar -->
+<div class="absolute left-0 top-0 bottom-0 w-1.5 bg-amber-500"></div>
+<!-- Top Row Badges -->
+<div class="flex items-center justify-between mb-2.5"><span class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-bold whitespace-nowrap">Ca 3 • Ca thi 4</span><span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[11px] font-bold whitespace-nowrap">LỊCH COI THI GK</span></div>
+<!-- Subject & Exam Info -->
+<div>
+<h3 class="text-base font-bold text-slate-900 leading-snug">Cơ học Đất &amp; Nền móng</h3>
+<p class="text-xs text-amber-800 font-medium mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
+<span class="">Vai trò: <strong class="text-amber-950 font-bold">Cán bộ coi thi 1</strong></span>
+<span class="">•</span>
+<span class="">Hình thức: <strong class="text-amber-950 font-bold">Tự luận 60 phút</strong></span>
+</p>
+</div>
+<!-- Time & Room Info Grid -->
+<div class="mt-3 grid grid-cols-2 gap-2 text-xs">
+<div class="bg-amber-50/60 rounded-xl p-2.5 border border-amber-200/80 flex items-center">
+<span class="material-symbols-outlined text-[18px] text-amber-600 mr-2 shrink-0">alarm</span>
+<div>
+<p class="text-[10px] text-amber-700 font-medium leading-none">Ca thi</p>
+<p class="font-bold text-slate-900 mt-0.5">16:00 - 17:30</p>
+</div>
+</div>
+<div class="bg-amber-50/60 rounded-xl p-2.5 border border-amber-200/80 flex items-center">
+<span class="material-symbols-outlined text-[18px] text-amber-600 mr-2 shrink-0">location_on</span>
+<div>
+<p class="text-[10px] text-amber-700 font-medium leading-none">Phòng thi</p>
+<p class="font-bold text-slate-900 mt-0.5">GD 204-A1 <span class="text-[10px] font-semibold text-slate-500">(45 SV)</span></p>
+</div>
+</div>
+</div>
+<!-- Bottom link -->
+<div class="mt-3 pt-2.5 border-t border-dashed border-amber-200 flex items-center justify-between text-[11px]">
+<button class="flex items-center gap-1 font-semibold text-amber-700 hover:text-amber-900 transition">
+<span class="material-symbols-outlined text-[15px]">badge</span>
+          Danh sách sinh viên phòng thi
+        </button>
+<span class="text-amber-600 font-bold">Đợt 2</span>
+</div>
+</div>
+</div>
+<!-- Status Legend (Chú thích màu sắc) -->
+<div class="pt-2 px-1">
+<div class="bg-slate-100/80 rounded-xl p-3 border border-slate-200/70">
+<p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-1.5">Chú thích lịch trình</p>
+<div class="grid grid-cols-2 gap-2 text-[11px] font-medium text-slate-600">
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-[#165DFF]"></span>
+<span class="">Lịch dạy lý thuyết/TH</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+<span class="">Lịch coi thi / Đánh giá</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+<span class="">Lịch trực tuyến (MS Teams)</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+<span class="">Nghỉ lễ / Tạm ngưng</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigation -->
+<!-- Standard HUCE SA Bottom Navigation Bar (4 Items with 'Lịch' active) -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white/95 backdrop-blur-md border-t border-slate-200 z-50 px-3 py-2 flex items-center justify-around shadow-lg" data-purpose="bottom-navigation-bar" style="max-width: 430px; width: 100%; margin: 0px auto; left: 50% !important; transform: translateX(-50%) !important;"><a class="flex flex-col items-center justify-center space-y-1 py-1 text-slate-500 hover:text-slate-900 transition-colors flex-1 active:scale-95" data-purpose="nav-tab-home" href="#"><span class="material-symbols-outlined text-[24px] leading-none text-slate-500">home</span><span class="text-[11px] font-medium text-slate-500 tracking-tight">Trang chủ</span></a><a class="flex flex-col items-center justify-center space-y-1 py-1 text-[#165DFF] flex-1 active:scale-95 transition-transform" data-purpose="nav-tab-schedule" href="#"><span class="material-symbols-outlined fill text-[24px] leading-none text-[#165DFF]">calendar_month</span><span class="text-[11px] font-bold text-[#165DFF] tracking-tight">Lịch</span></a><a class="flex flex-col items-center justify-center space-y-1 py-1 text-slate-500 hover:text-slate-900 transition-colors flex-1 active:scale-95" data-purpose="nav-tab-attendance" href="#"><span class="material-symbols-outlined text-[24px] leading-none text-slate-500">qr_code_scanner</span><span class="text-[11px] font-medium text-slate-500 tracking-tight">Điểm danh</span></a><a class="flex flex-col items-center justify-center space-y-1 py-1 text-slate-500 hover:text-slate-900 transition-colors flex-1 active:scale-95" data-purpose="nav-tab-profile" href="#"><span class="material-symbols-outlined text-[24px] leading-none text-slate-500">person</span><span class="text-[11px] font-medium text-slate-500 tracking-tight">Hồ sơ</span></a></nav>
+<!-- END: BottomNavigation -->
+</div>
+
+
+</body></html>

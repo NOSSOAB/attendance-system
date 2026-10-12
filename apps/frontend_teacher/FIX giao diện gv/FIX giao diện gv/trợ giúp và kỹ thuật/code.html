@@ -1,0 +1,299 @@
+<!DOCTYPE html><html lang="vi" style=""><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Trợ giúp &amp; Hỗ trợ kỹ thuật - Giảng viên HUCE SA</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200">
+  <style>
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      vertical-align: middle;
+    }
+    .material-symbols-outlined.fill {
+      font-variation-settings: 'FILL' 1;
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 flex justify-center min-h-screen">
+  <div class="w-full max-w-[430px] min-h-screen bg-slate-50 flex flex-col relative pb-28 shadow-xl">
+    
+    <!-- Top Header -->
+    <header class="bg-gradient-to-b from-[#165DFF] to-[#0E4FD8] text-white pt-6 pb-6 px-4 rounded-b-[2rem] shadow-md relative">
+      <div class="flex items-center justify-between">
+        <a href="javascript:history.back()" class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md flex items-center justify-center transition-all">
+          <span class="material-symbols-outlined text-white text-xl">arrow_back</span>
+        </a>
+        <h1 class="text-lg font-semibold tracking-wide text-center flex-1 mx-2">Trợ giúp &amp; Hỗ trợ kỹ thuật</h1>
+        <button class="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 backdrop-blur-md flex items-center justify-center transition-all relative">
+          <span class="material-symbols-outlined text-white text-xl">notifications</span>
+          <span class="absolute top-2 right-2 w-2 h-2 bg-red-400 rounded-full ring-2 ring-[#165DFF]"></span>
+        </button>
+      </div>
+
+      <!-- Quick Search Bar -->
+      <div class="mt-5 relative">
+        <span class="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 text-xl">search</span>
+        <input type="text" placeholder="Tìm câu hỏi, sự cố hoặc từ khóa..." class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-white text-slate-800 placeholder-slate-400 text-sm focus:outline-none focus:ring-2 focus:ring-white/50 shadow-sm">
+      </div>
+
+      <!-- Quick Contact Hotline Banner -->
+      <div class="mt-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl p-3 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-lg bg-emerald-500/20 text-emerald-300 flex items-center justify-center border border-emerald-400/30">
+            <span class="material-symbols-outlined text-xl">support_agent</span>
+          </div>
+          <div class="text-center">
+            <div class="text-xs text-blue-100 font-medium">Tổng đài CNTT HUCE&nbsp;</div>
+            <div class="text-sm font-bold text-white tracking-wide">024 3869 1302&nbsp;</div>
+          </div>
+        </div>
+        <a href="tel:02438691302" class="px-2.5 py-1.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-lg text-xs font-semibold flex items-center gap-1 shadow-sm transition-all">
+          <span class="material-symbols-outlined text-sm">call</span> Gọi ngay
+        </a>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="px-4 mt-4 space-y-4 flex-1">
+
+      <!-- Kênh hỗ trợ trực tiếp (Action Cards) -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+        <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-blue-600 text-base">forum</span>
+          Kênh liên hệ trực tiếp
+        </h2>
+        <div class="grid grid-cols-3 gap-2.5">
+          <!-- Zalo Hỗ trợ -->
+          <button class="flex flex-col items-center justify-center p-3 rounded-xl bg-blue-50/70 hover:bg-blue-100/70 border border-blue-100 text-center transition-all">
+            <div class="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center mb-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-xl">chat</span>
+            </div>
+            <span class="text-xs font-semibold text-slate-800">Zalo Hỗ trợ</span>
+            <span class="text-[10px] text-emerald-600 font-medium flex items-center mt-0.5">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1 animate-pulse"></span>Trực tuyến
+            </span>
+          </button>
+
+          <!-- Gửi Ticket / Báo lỗi -->
+          <button class="flex flex-col items-center justify-center p-3 rounded-xl bg-amber-50/70 hover:bg-amber-100/70 border border-amber-100 text-center transition-all">
+            <div class="w-10 h-10 rounded-full bg-amber-500 text-white flex items-center justify-center mb-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-xl">confirmation_number</span>
+            </div>
+            <span class="text-xs font-semibold text-slate-800">Tạo yêu cầu</span>
+            <span class="text-[10px] text-amber-700 font-medium mt-0.5">Xử lý trong 2h</span>
+          </button>
+
+          <!-- Email TT CNTT -->
+          <button class="flex flex-col items-center justify-center p-3 rounded-xl bg-purple-50/70 hover:bg-purple-100/70 border border-purple-100 text-center transition-all">
+            <div class="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center mb-1.5 shadow-sm">
+              <span class="material-symbols-outlined text-xl">mail</span>
+            </div>
+            <span class="text-xs font-semibold text-slate-800">Email IT</span>
+            <span class="text-[10px] text-slate-500 font-medium mt-0.5">it@huce.edu.vn</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- Sự cố phổ biến giảng viên thường gặp -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <span class="material-symbols-outlined text-blue-600 text-base">quiz</span>
+            Sự cố thường gặp
+          </h2>
+          <span class="text-xs font-semibold text-[#165DFF] cursor-pointer">Xem tất cả</span>
+        </div>
+
+        <div class="space-y-2"><!-- Item 1: BLE & Bluetooth -->
+<details class="group bg-slate-50 border border-slate-200/80 rounded-xl overflow-hidden">
+  <summary class="flex items-center justify-between p-3 cursor-pointer list-none select-none hover:bg-slate-100/60 transition-colors">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-lg bg-blue-100/70 text-blue-600 flex items-center justify-center">
+        <span class="material-symbols-outlined text-lg">bluetooth</span>
+      </div>
+      <span class="text-xs font-semibold text-slate-800">Sinh viên không quét được Bluetooth (BLE)?</span>
+    </div>
+    <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform text-lg">expand_more</span>
+  </summary>
+  <div class="p-3 pt-2 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 bg-white space-y-3">
+    <p class="">Vào mục <strong>Cài đặt hệ thống</strong> &gt; Kiểm tra đã cấp quyền <em>Bluetooth</em> và <em>Định vị</em>. Đảm bảo đã bật <strong>Tự động phát tín hiệu Beacon</strong> với bán kính chuẩn 10m - 15m.</p>
+    
+    <!-- Mini UI Mock Preview: BLE & Beacon Settings -->
+    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 shadow-sm">
+      <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/60">
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[#165DFF] text-base">settings_bluetooth</span>
+          <span class="font-semibold text-slate-800 text-[11px]">Cài đặt BLE &amp; Thiết bị</span>
+        </div>
+        <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-400/30 rounded-full text-[10px] font-medium flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>Đang phát sóng
+        </span>
+      </div>
+
+      <div class="space-y-2 text-[11px]">
+        <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200/60">
+          <span class="text-slate-700 font-medium">Phát Beacon lớp học</span>
+          <span class="px-2.5 py-0.5 bg-blue-600 text-white rounded-full font-semibold text-[10px]">BẬT</span>
+        </div>
+        <div class="bg-white p-2 rounded-lg border border-slate-200/60 flex items-center justify-between">
+          <span class="text-slate-700 font-medium">Bán kính phủ sóng</span>
+          <div class="flex gap-1">
+            <span class="px-2 py-0.5 bg-[#165DFF] text-white rounded font-medium text-[10px] shadow-sm">10m - 15m (Chuẩn)</span>
+            <span class="px-2 py-0.5 bg-slate-100 text-slate-500 rounded font-medium text-[10px]">&gt; 25m</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- Item 2: Không đồng bộ sổ điểm -->
+<details class="group bg-slate-50 border border-slate-200/80 rounded-xl overflow-hidden">
+  <summary class="flex items-center justify-between p-3 cursor-pointer list-none select-none hover:bg-slate-100/60 transition-colors">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-lg bg-emerald-100/70 text-emerald-600 flex items-center justify-center">
+        <span class="material-symbols-outlined text-lg">sync_problem</span>
+      </div>
+      <span class="text-xs font-semibold text-slate-800">Không đồng bộ được dữ liệu lên Edusoft HUCE?</span>
+    </div>
+    <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform text-lg">expand_more</span>
+  </summary>
+  <div class="p-3 pt-2 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 bg-white space-y-3">
+    <p class="">Vui lòng kiểm tra kết nối mạng Wi-Fi trường (HUCE-STAFF) hoặc 4G/5G. Sau đó vào màn hình <strong>Hồ sơ</strong> &gt; kiểm tra trạng thái <em>Đồng bộ Cổng thông tin HUCE</em>.</p>
+    
+    <!-- Mini UI Mock Preview: Sync Edusoft Portal -->
+    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 shadow-sm">
+      <div class="flex items-center justify-between pb-2 mb-2.5 border-b border-slate-200/60">
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-emerald-600 text-base">cloud_done</span>
+          <span class="font-semibold text-slate-800 text-[11px]">Trạng thái Cổng Đào tạo Edusoft</span>
+        </div>
+        <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-400/30 rounded-full text-[10px] font-medium flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>Đã kết nối
+        </span>
+      </div>
+      <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200/60">
+        <div>
+          <div class="text-[11px] font-medium text-slate-700">Đồng bộ gần nhất: 10 phút trước</div>
+          <div class="text-[10px] text-slate-400">Máy chủ: edusoft.huce.edu.vn</div>
+        </div>
+        <button class="px-2.5 py-1 bg-emerald-500 hover:bg-emerald-600 text-white rounded text-[10px] font-semibold flex items-center gap-1 shadow-sm">
+          <span class="material-symbols-outlined text-xs">sync</span> Đồng bộ ngay
+        </button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- Item 3: Sinh viên vắng thi và điều chỉnh danh sách -->
+<details class="group bg-slate-50 border border-slate-200/80 rounded-xl overflow-hidden">
+  <summary class="flex items-center justify-between p-3 cursor-pointer list-none select-none hover:bg-slate-100/60 transition-colors">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-lg bg-amber-100/70 text-amber-600 flex items-center justify-center">
+        <span class="material-symbols-outlined text-lg">person_off</span>
+      </div>
+      <span class="text-xs font-semibold text-slate-800">Xử lý điểm danh bù cho sinh viên bị lỗi mạng?</span>
+    </div>
+    <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform text-lg">expand_more</span>
+  </summary>
+  <div class="p-3 pt-2 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 bg-white space-y-3">
+    <p class="">Trong ca dạy, chuyển sang tab <strong>Cần xử lý ngoại lệ</strong> hoặc <strong>Chưa có mặt</strong> &gt; bấm nút <strong>Điểm danh bù</strong> tương ứng với sinh viên đó trước khi nhấn <em>Chốt điểm danh &amp; Lưu sổ điểm</em>.</p>
+    
+    <!-- Mini UI Mock Preview: Exception Tab Attendance -->
+    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 shadow-sm">
+      <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200/60">
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-amber-500 text-base">rule</span>
+          <span class="font-semibold text-slate-800 text-[11px]">Tab Ngoại lệ / Chưa có mặt</span>
+        </div>
+        <span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-[10px] font-medium">1 ngoại lệ chờ</span>
+      </div>
+      <div class="flex items-center justify-between bg-white p-2 rounded-lg border border-slate-200/60">
+        <div>
+          <div class="text-[11px] font-medium text-slate-800">Nguyễn Tuấn Anh (65XD1)</div>
+          <div class="text-[10px] text-amber-600">Lỗi mất kết nối BLE lớp học</div>
+        </div>
+        <button class="px-2.5 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[10px] font-semibold flex items-center gap-1 shadow-sm">
+          <span class="material-symbols-outlined text-xs">how_to_reg</span> Điểm danh bù
+        </button>
+      </div>
+    </div>
+  </div>
+</details>
+
+<!-- Item 4: Quên mật khẩu SSO -->
+<details class="group bg-slate-50 border border-slate-200/80 rounded-xl overflow-hidden">
+  <summary class="flex items-center justify-between p-3 cursor-pointer list-none select-none hover:bg-slate-100/60 transition-colors">
+    <div class="flex items-center gap-2.5">
+      <div class="w-7 h-7 rounded-lg bg-purple-100/70 text-purple-600 flex items-center justify-center">
+        <span class="material-symbols-outlined text-lg">key</span>
+      </div>
+      <span class="text-xs font-semibold text-slate-800">Cấp lại mật khẩu tài khoản Cán bộ Giảng viên?</span>
+    </div>
+    <span class="material-symbols-outlined text-slate-400 group-open:rotate-180 transition-transform text-lg">expand_more</span>
+  </summary>
+  <div class="p-3 pt-2 text-xs text-slate-600 leading-relaxed border-t border-slate-200/60 bg-white space-y-3">
+    <p class="">Liên hệ trực tiếp Trung tâm Quản trị Mạng &amp; Thiết bị trường ĐH Xây dựng Hà Nội tại <strong>Phòng 104 - Nhà H1</strong> kèm Thẻ viên chức/CCCD để được cấp lại mật khẩu SSO.</p>
+    
+    <!-- Mini UI Mock Preview: SSO Support Location -->
+    <div class="bg-slate-50 border border-slate-200/80 rounded-xl p-3 shadow-sm">
+      <div class="flex items-center justify-between pb-2 mb-2 border-b border-slate-200/60">
+        <div class="flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-purple-600 text-base">verified_user</span>
+          <span class="font-semibold text-slate-800 text-[11px]">Cổng xác thực SSO HUCE</span>
+        </div>
+        <span class="px-2 py-0.5 bg-purple-50 text-purple-600 rounded text-[10px] font-medium">Hỗ trợ trực tiếp</span>
+      </div>
+      <div class="bg-white p-2 rounded-lg border border-slate-200/60 flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="material-symbols-outlined text-slate-400 text-base">location_on</span>
+          <div>
+            <div class="text-[11px] font-semibold text-slate-800">Phòng 104 - Nhà H1 (TT Mạng)</div>
+            <div class="text-[10px] text-slate-500">Giờ hành chính • Mang thẻ cán bộ</div>
+          </div>
+        </div>
+        <span class="px-2 py-0.5 bg-slate-100 text-[#165DFF] text-[10px] font-semibold rounded">Cấp lại ngay</span>
+      </div>
+    </div>
+  </div>
+</details></div>
+      </section>
+
+      <!-- Hướng dẫn sử dụng & Tài liệu -->
+      <section class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100"><div class="flex items-center justify-between mb-3"><h2 class="text-xs font-semibold uppercase tracking-wider text-slate-500 flex items-center gap-1.5"><span class="material-symbols-outlined text-blue-600 text-base">menu_book</span>Tài liệu &amp; Cẩm nang số</h2><span class="text-[11px] font-semibold text-[#165DFF] cursor-pointer hover:underline">Kho tài liệu (8)</span></div><div class="space-y-3"><!-- Item 1: Expanded Active PDF Preview with Visual Mockup --><div class="border border-blue-100 rounded-xl bg-blue-50/70 p-3 shadow-sm"><div class="flex items-start justify-between"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-sm"><span class="material-symbols-outlined text-lg">description</span></div><div><div class="text-xs font-bold text-slate-800">Quy trình Điểm danh thông minh (QR &amp; BLE)</div><div class="text-[10px] text-slate-500">PDF • 1.8 MB • Cập nhật HK2 2024-2025</div></div></div><span class="px-2 py-0.5 bg-blue-100/70 text-[#165DFF] rounded-full text-[10px] font-semibold border border-blue-100">Đang xem</span></div><!-- Visual Document / App Preview Card --><div class="mt-2.5 bg-white rounded-xl border border-blue-100 overflow-hidden shadow-sm"><div class="relative bg-gradient-to-b from-[#165DFF] to-[#0E4FD8] p-3 text-white"><div class="flex items-center justify-between mb-2"><span class="px-2 py-0.5 bg-white/20 backdrop-blur-md rounded-full text-[10px] font-medium flex items-center gap-1"><span class="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>Trang 1/4 • Hướng dẫn quét BLE</span><span class="text-[10px] text-blue-100 font-medium">HUCE SA v2.4</span></div><!-- Simulated Mini Screen Preview --><div class="bg-white rounded-lg p-2.5 text-slate-800 shadow-md border border-slate-100"><div class="flex items-center justify-between pb-1.5 mb-2 border-b border-slate-100"><div class="flex items-center gap-1.5"><span class="material-symbols-outlined text-[#165DFF] text-sm">sensors</span><span class="text-[11px] font-bold text-slate-800">Phiên điểm danh: 65XD1 - Kiến trúc</span></div><span class="text-[9px] px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-600 font-semibold">Đang nhận BLE</span></div><div class="grid grid-cols-3 gap-1.5 text-center mb-2"><div class="p-1.5 bg-slate-50 rounded border border-slate-100"><div class="text-[9px] text-slate-400">Đã quét</div><div class="text-xs font-bold text-[#165DFF]">42/48</div></div><div class="p-1.5 bg-slate-50 rounded border border-slate-100"><div class="text-[9px] text-slate-400">Tín hiệu</div><div class="text-xs font-bold text-emerald-600">Mạnh (-62dB)</div></div><div class="p-1.5 bg-slate-50 rounded border border-slate-100"><div class="text-[9px] text-slate-400">QR Động</div><div class="text-xs font-bold text-amber-600">15s đổi mã</div></div></div><div class="text-[10px] text-slate-500 bg-slate-50 p-1.5 rounded flex items-center gap-1.5"><span class="material-symbols-outlined text-blue-600 text-xs">info</span><span class="">Bước 1: Giảng viên kích hoạt phát Beacon trên lớp học.</span></div></div></div><!-- Footer Action inside Preview --><div class="p-2.5 bg-white flex items-center justify-between border-t border-slate-100"><div class="flex items-center gap-1 text-[11px] text-slate-500"><span class="material-symbols-outlined text-sm text-slate-400">zoom_in</span><span class="">Chạm để phóng to</span></div><div class="flex gap-2"><button class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-[10px] font-semibold flex items-center gap-1 transition-colors"><span class="material-symbols-outlined text-xs">fullscreen</span>Toàn màn hình</button><button class="px-2.5 py-1 bg-[#165DFF] hover:bg-[#0E4FD8] text-white rounded-lg text-[10px] font-semibold flex items-center gap-1 shadow-sm transition-colors"><span class="material-symbols-outlined text-xs">download</span>Tải PDF (1.8 MB)</button></div></div></div></div><!-- Item 2: Video Thumbnail Preview --><div class="border border-slate-200/80 rounded-xl bg-slate-50 overflow-hidden hover:border-blue-100 transition-all"><div class="p-3"><div class="flex items-center justify-between mb-2"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center"><span class="material-symbols-outlined text-lg">play_circle</span></div><div><div class="text-xs font-semibold text-slate-800">Video hướng dẫn chốt sổ điểm ca dạy</div><div class="text-[10px] text-slate-500">Dành cho Giảng viên mới • Video HD 1080p</div></div></div><span class="material-symbols-outlined text-slate-400 text-lg">open_in_new</span></div><!-- Video Thumbnail Screen Mockup --><div class="relative rounded-lg overflow-hidden bg-slate-800 aspect-[16/6] flex items-center justify-center group cursor-pointer border border-slate-200/60"><div class="absolute inset-0 bg-gradient-to-r from-blue-900/80 via-slate-900/60 to-blue-950/80"></div><div class="absolute top-2 left-2 flex items-center gap-1 text-[10px] text-white bg-black/40 backdrop-blur-md px-2 py-0.5 rounded"><span class="material-symbols-outlined text-xs text-red-400 fill">fiber_manual_record</span>Giao diện sổ điểm HUCE</div><div class="relative z-10 w-9 h-9 rounded-full bg-white/90 group-hover:bg-white text-[#165DFF] flex items-center justify-center shadow-lg transition-transform group-hover:scale-105"><span class="material-symbols-outlined text-xl ml-0.5">play_arrow</span></div><span class="absolute bottom-2 right-2 text-[10px] font-semibold bg-black/70 text-white px-2 py-0.5 rounded backdrop-blur-sm">03:15</span></div></div></div><!-- Item 3: Quy chế đào tạo --><div class="border border-slate-200/80 rounded-xl bg-slate-50 p-3 hover:border-blue-100 transition-all"><div class="flex items-center justify-between"><div class="flex items-center gap-2.5"><div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center"><span class="material-symbols-outlined text-lg">gavel</span></div><div><div class="text-xs font-semibold text-slate-800">Quy chế đào tạo &amp; chuyên cần tín chỉ HUCE</div><div class="text-[10px] text-slate-500">Điều 14: Quy định mức vắng &gt;20% số tiết học</div></div></div><span class="px-2 py-0.5 bg-amber-100/70 text-amber-700 rounded text-[10px] font-medium">Hiệu lực 2024</span></div></div></div></section>
+
+      <!-- Gửi phản hồi / Báo lỗi trực tiếp -->
+      
+
+    </main>
+
+    <!-- Fixed Bottom Tab Bar -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[430px] bg-white border-t border-slate-200/80 px-6 py-2 flex items-center justify-between z-50">
+      <a href="#" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors">
+        <span class="material-symbols-outlined text-2xl">home</span>
+        <span class="text-[10px] font-medium">Trang chủ</span>
+      </a>
+      <a href="#" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors">
+        <span class="material-symbols-outlined text-2xl">calendar_month</span>
+        <span class="text-[10px] font-medium">Lịch</span>
+      </a>
+      <a href="#" class="flex flex-col items-center gap-1 text-slate-400 hover:text-slate-600 transition-colors">
+        <span class="material-symbols-outlined text-2xl">qr_code_scanner</span>
+        <span class="text-[10px] font-medium">Điểm danh</span>
+      </a>
+      <a href="#" class="flex flex-col items-center gap-1 text-[#165DFF]">
+        <span class="material-symbols-outlined text-2xl fill">person</span>
+        <span class="text-[10px] font-semibold">Hồ sơ</span>
+      </a>
+    </nav>
+
+  </div>
+
+
+
+</body></html>
