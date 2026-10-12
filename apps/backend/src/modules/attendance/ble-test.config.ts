@@ -21,13 +21,14 @@ export class BleTestConfig {
 
   static forRoom(room: string): BleSessionExpectation {
     const roomId = BleTestConfig.toRoomId(room);
+    const devices = BleTestConfig.devicesForRoom(roomId);
     return {
-      beaconId: BleTestConfig.beaconId,
+      beaconId: devices[0]?.beaconId ?? BleTestConfig.beaconId,
       roomId,
       deviceName: BleTestConfig.deviceName,
       serviceUuid: BleTestConfig.serviceUuid,
       minRssi: BleTestConfig.minRssi,
-      deviceIds: BleTestConfig.deviceIds(BleTestConfig.beaconId, roomId),
+      deviceIds: devices.map((device) => device.deviceId),
     };
   }
 
@@ -48,7 +49,9 @@ export class BleTestConfig {
       serviceUuid:
         session.bleServiceUuid?.trim().toLowerCase() || fallback.serviceUuid,
       minRssi: session.bleMinRssi ?? fallback.minRssi,
-      deviceIds: BleTestConfig.deviceIds(beaconId, roomId),
+      deviceIds: BleTestConfig.devicesForRoom(roomId).map(
+        (device) => device.deviceId,
+      ),
     };
   }
 
@@ -90,10 +93,7 @@ export class BleTestConfig {
       ? verifyBleC6Token(evidence.c6Token)
       : null;
     if (!authenticated) return 'INVALID_EVIDENCE';
-    if (
-      authenticated.beaconId !== expected.beaconId ||
-      authenticated.roomId !== expected.roomId
-    ) {
+    if (authenticated.roomId !== expected.roomId) {
       return 'BLE_ROOM_MISMATCH';
     }
 
@@ -119,11 +119,9 @@ export class BleTestConfig {
     return Number.isFinite(configured) ? Math.round(configured) : -80;
   }
 
-  private static deviceIds(beaconId: string, roomId: string): string[] {
-    return [...parseRegistry(process.env.BLE_C6_DEVICES_JSON ?? '').values()]
-      .filter(
-        (device) => device.beaconId === beaconId && device.roomId === roomId,
-      )
-      .map((device) => device.deviceId);
+  private static devicesForRoom(roomId: string) {
+    return [
+      ...parseRegistry(process.env.BLE_C6_DEVICES_JSON ?? '').values(),
+    ].filter((device) => device.roomId === roomId);
   }
 }

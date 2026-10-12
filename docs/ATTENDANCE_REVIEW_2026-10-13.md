@@ -11,7 +11,7 @@ Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khu
 | GitHub `main` trước đợt cập nhật | Commit `7236c0f`, 01/09/2026 13:29 ICT |
 | Mã mới trên GitHub `main` | Commit tích hợp `d48ac6f` đã push; gồm BLE ESP32-C6, mobile face, migration và hướng dẫn triển khai |
 | Nhánh firmware ESP32-C6 | Commit `408626f`, 10/09/2026 02:16 ICT; đã tích hợp giao thức vào app/API và chuyển khóa thiết bị ra file riêng |
-| Backend | Build thành công; 18/18 suite, 72/72 test qua |
+| Backend | Build thành công; 18/18 suite, 74/74 test qua |
 | Flutter | `flutter analyze` không có lỗi; 33/33 test qua |
 | Python Face Auth và ETL | 25/25 và 20/20 test qua ở lần rà soát trước |
 | Android | APK profile v1.0.13+14 build thành công cho arm64 với BLE và mobile face bật |
@@ -27,7 +27,7 @@ Bản APK profile để thử demo trên máy Android arm64: `dist/smartattendan
 
 ## Thay đổi quan trọng
 
-1. Bật BLE trong cấu hình build ứng dụng. Backend nhận `c6Token` thay cho thông tin phòng do client tự khai và từ chối token sai, mock, tín hiệu yếu, phòng không khớp, thời gian quét bất hợp lý.
+1. Bật BLE trong cấu hình build ứng dụng. Backend nhận `c6Token` thay cho thông tin phòng do client tự khai và từ chối token sai, mock, tín hiệu yếu, phòng không khớp, thời gian quét bất hợp lý. Nhiều beacon đã đăng ký trong cùng phòng đều được hỗ trợ; backend production kiểm tra registry lúc khởi động.
 2. Tách khóa AES khỏi firmware công khai. Mỗi ESP32-C6 cần một `deviceId` và khóa riêng; chỉ ghi khóa vào firmware và `BLE_C6_DEVICES_JSON` bí mật trên server.
 3. Không lưu token BLE thô vào JSON chứng cứ. Thêm script chuẩn bị model có kiểm tra hash và quy trình ký release.
 

@@ -63,7 +63,12 @@ export function verifyBleC6Token(
 
 export function parseRegistry(raw: string): Map<string, BleC6Device> {
   if (!raw.trim()) return new Map();
-  const parsed: unknown = JSON.parse(raw);
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    throw new Error('BLE_C6_DEVICES_JSON must be valid JSON');
+  }
   if (!Array.isArray(parsed)) {
     throw new Error('BLE_C6_DEVICES_JSON must be an array');
   }
