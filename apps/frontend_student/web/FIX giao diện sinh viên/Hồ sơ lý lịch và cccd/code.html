@@ -1,0 +1,335 @@
+<!DOCTYPE html><html lang="vi"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Hồ sơ lý lịch &amp; CMND/CCCD - HUCE SA</title>
+<!-- Google Font: Be Vietnam Pro -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<!-- Tailwind CSS CDN with Forms & Container Plugins -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Tailwind Custom Configuration -->
+<script data-purpose="tailwind-config" id="tailwind-config">
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '#165DFF',
+              light: '#EBF2FF',
+              dark: '#0047E0'
+            },
+            surface: '#F8FAFC'
+          },
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+<style data-purpose="custom-layout">
+    body {
+      font-family: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+    /* iOS Safe Area Padding Helpers */
+    .pb-safe {
+      padding-bottom: env(safe-area-inset-bottom, 16px);
+    }
+    .pt-safe {
+      padding-top: env(safe-area-inset-top, 12px);
+    }
+  </style>
+<meta content="mobile_tab" name="shell-type"></head>
+<body class="bg-slate-100 flex justify-center min-h-screen text-slate-800 antialiased selection:bg-brand selection:text-white">
+<!-- Mobile Device Shell Simulation -->
+<div class="w-full max-w-[420px] bg-[#F8FAFC] min-h-screen flex flex-col relative shadow-2xl overflow-x-hidden pb-24">
+<!-- BEGIN: TopAppBar -->
+<header class="bg-[#165DFF] text-white pt-safe px-4 pb-12 relative rounded-b-[32px] shadow-md shadow-blue-500/10">
+<!-- Status bar / Top Action Bar -->
+<div class="flex items-center justify-between pt-3 pb-2">
+<!-- Back Navigation Button -->
+<button aria-label="Quay lại" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-md active:scale-95 transition-transform" type="button">
+<svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+<path d="M15.75 19.5L8.25 12l7.5-7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<!-- Screen Title -->
+<h1 class="text-lg font-bold tracking-tight text-white drop-shadow-sm">Hồ sơ lý lịch &amp; CCCD</h1>
+<!-- Action / Notifications Button -->
+<button aria-label="Thông báo" class="w-10 h-10 flex items-center justify-center rounded-full bg-white/15 backdrop-blur-md relative active:scale-95 transition-transform" type="button">
+<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+<path d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border border-white ring-2 ring-red-400/50"></span>
+</button>
+</div>
+<!-- Verified Badge Overview -->
+<div class="mt-2 flex items-center justify-between px-1">
+<div class="flex items-center space-x-2">
+<div class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></div>
+<span class="text-xs font-medium text-blue-100">Dữ liệu đồng bộ Cổng Đào Tạo HUCE</span>
+</div>
+<span class="text-[11px] bg-white/20 text-white font-medium px-2 py-0.5 rounded-full border border-white/20">K65 • Chính quy</span>
+</div>
+</header>
+<!-- END: TopAppBar -->
+<!-- BEGIN: MainContent -->
+<main class="flex-1 px-4 -mt-6 space-y-4 z-10" data-purpose="profile-details-container"><div class="flex flex-col w-full space-y-4">
+<!-- Student Identity Banner -->
+<div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 relative overflow-hidden">
+<div class="flex items-center space-x-3.5"><div class="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0 text-[#165DFF]">
+<span class="material-symbols-outlined text-[32px]">person</span>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center space-x-2">
+<h2 class="text-base font-bold text-slate-800 truncate">NGUYỄN VĂN A</h2>
+</div>
+<p class="text-xs text-slate-500 flex items-center gap-1.5 mt-0.5">
+<span class="">MSSV: <strong class="text-slate-700 font-semibold">123456</strong></span>
+<span class="text-slate-300">•</span>
+<span class="">Lớp: <strong class="text-slate-700 font-semibold">65KD1</strong></span>
+</p>
+<div class="flex items-center gap-2 mt-1.5">
+<span class="text-[11px] bg-blue-50 text-blue-700 font-medium px-2 py-0.5 rounded-full inline-flex items-center gap-1"><span class="material-symbols-outlined text-[12px]">school</span>
+      Khoa XD Dân dụng &amp; CN
+    </span>
+</div>
+</div></div>
+</div>
+<!-- Digital ID Card (CCCD / VNeID Tier 2) -->
+<div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#165DFF] via-[#0047cf] to-[#2563eb] p-4.5 text-white shadow-md p-4"><div class="absolute -right-6 -bottom-8 w-44 h-44 rounded-full bg-white/5 pointer-events-none blur-2xl"></div>
+<div class="absolute -left-10 -top-10 w-36 h-36 rounded-full bg-white/10 pointer-events-none blur-xl"></div>
+<div class="relative z-10 flex flex-col space-y-3">
+<div class="flex items-center justify-between">
+<div class="flex items-center space-x-2">
+<span class="material-symbols-outlined text-[20px] text-blue-200">badge</span>
+<span class="text-sm font-semibold tracking-wide">CĂN CƯỚC CÔNG DÂN</span>
+</div>
+<div class="bg-white/20 backdrop-blur-md rounded-full px-2.5 py-0.5 flex items-center space-x-1.5 shadow-sm">
+<span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+<span class="text-[11px] text-white font-medium">Đã xác thực</span>
+</div>
+</div>
+<div class="bg-white/10 backdrop-blur-sm rounded-xl p-3 flex flex-col space-y-1">
+<span class="text-[10px] text-blue-100 opacity-90">Số Căn cước / ID Number</span>
+<div class="flex items-center justify-between">
+<span class="text-xl tracking-widest text-white font-mono font-bold" id="cccdNumber">0012 0301 2345</span>
+<button aria-label="Sao chép số CCCD" class="text-white/80 hover:text-white transition-transform active:scale-90 p-1" onclick="navigator.clipboard &amp;&amp; navigator.clipboard.writeText('001203012345'); this.classList.add('scale-125'); setTimeout(()=&gt;this.classList.remove('scale-125'),200);" type="button">
+<span class="material-symbols-outlined text-[18px]">content_copy</span>
+</button>
+</div>
+</div>
+</div></div>
+<!-- Personal Information Block -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+<!-- Block Header -->
+<div class="px-4 py-3 bg-slate-50 flex items-center space-x-2 border-b border-slate-100">
+<div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-[#165DFF]">
+<span class="material-symbols-outlined text-[18px]">badge</span>
+</div>
+<h3 class="text-sm font-bold text-slate-800">THÔNG TIN CÁ NHÂN</h3>
+</div>
+<!-- Details List -->
+<div class="p-4 space-y-3 text-sm">
+<div class="flex items-center justify-between py-1">
+<span class="text-slate-500 font-normal">Họ và tên</span>
+<span class="text-sm text-slate-800 font-semibold tracking-wide">NGUYỄN VĂN A</span>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<div class="flex items-center justify-between py-1">
+<span class="text-slate-500 font-normal">Giới tính</span>
+<span class="text-sm text-slate-800 font-semibold">Nam</span>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<div class="flex items-center justify-between py-1">
+<span class="text-slate-500 font-normal">Ngày sinh</span>
+<span class="text-sm text-slate-800 font-semibold">15/10/2003</span>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<div class="flex items-center justify-between py-1">
+<span class="text-slate-500 font-normal">Dân tộc</span>
+<span class="text-sm text-slate-800 font-semibold">Kinh</span>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<div class="flex items-center justify-between py-1">
+<span class="text-slate-500 font-normal">Tôn giáo</span>
+<span class="text-sm text-slate-800 font-semibold">Không</span>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<div class="flex items-center justify-between py-1">
+<span class="text-slate-500 font-normal">Quốc tịch</span>
+<span class="text-sm text-slate-800 font-semibold inline-flex items-center gap-1.5">
+<svg class="w-4 h-3 rounded-xs shadow-xs" fill="none" viewBox="0 0 30 20">
+<rect fill="#DA251D" height="20" width="30"></rect>
+<polygon fill="#FFFF00" points="15,4 17.65,12.14 10.71,7.12 19.29,7.12 12.35,12.14"></polygon>
+</svg>
+          Việt Nam
+        </span>
+</div>
+</div>
+</div>
+<!-- Contact & Residence Block -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+<!-- Block Header -->
+<div class="px-4 py-3 bg-slate-50 flex items-center space-x-2 border-b border-slate-100">
+<div class="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center text-[#165DFF]">
+<span class="material-symbols-outlined text-[18px]">contact_mail</span>
+</div>
+<h3 class="text-sm font-bold text-slate-800">LIÊN HỆ &amp; HỘ KHẨU</h3>
+</div>
+<div class="p-4 space-y-3 text-sm">
+<!-- Phone -->
+<div class="flex items-center justify-between py-1">
+<span class="text-slate-500 font-normal flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-slate-400">call</span>
+          Số điện thoại
+        </span>
+<a class="text-sm text-[#165DFF] font-semibold hover:underline flex items-center gap-1" href="tel:0987654321">
+          0987.654.321
+          <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<!-- Email -->
+<div class="flex items-start justify-between py-1">
+<span class="text-slate-500 font-normal flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] text-slate-400">alternate_email</span>
+          Email trường cấp
+        </span>
+<a class="text-xs text-slate-700 font-semibold text-right break-all hover:text-[#165DFF]" href="mailto:anva.65kd1@huce.edu.vn">
+          anva.65kd1@huce.edu.vn
+        </a>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<!-- Native Place -->
+<div class="flex items-start justify-between py-1">
+<span class="text-slate-500 font-normal flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] text-slate-400">travel_explore</span>
+          Quê quán
+        </span>
+<span class="text-xs text-slate-700 font-semibold text-right max-w-[210px]">
+          Huyện Thanh Trì, TP. Hà Nội
+        </span>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<!-- Permanent Residence -->
+<div class="flex items-start justify-between py-1">
+<span class="text-slate-500 font-normal flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] text-slate-400">home_pin</span>
+          Hộ khẩu thường trú
+        </span>
+<span class="text-xs text-slate-700 font-semibold text-right max-w-[210px] leading-snug">
+          Số 12, Ngõ 45, Đường Giải Phóng, Phường Đồng Tâm, Quận Hai Bà Trưng, TP. Hà Nội
+        </span>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<!-- Current Accommodation -->
+<div class="flex items-start justify-between py-1">
+<span class="text-slate-500 font-normal flex items-center gap-1 flex-shrink-0">
+<span class="material-symbols-outlined text-[16px] text-slate-400">apartment</span>
+          Tạm trú hiện tại
+        </span>
+<div class="text-right max-w-[210px]">
+<span class="text-xs text-slate-700 font-semibold block leading-snug">
+            Ký túc xá HUCE, 55 Giải Phóng, Hai Bà Trưng, Hà Nội
+          </span>
+<span class="inline-block mt-1 text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full font-medium">
+            Khu B • Phòng 402
+          </span>
+</div>
+</div>
+</div>
+</div>
+<!-- Emergency Contact Block -->
+<div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+<div class="px-4 py-3 bg-red-50/70 flex items-center justify-between border-b border-red-100/60">
+<div class="flex items-center space-x-2">
+<div class="w-7 h-7 rounded-lg bg-red-100 flex items-center justify-center text-red-600">
+<span class="material-symbols-outlined text-[18px]">e911_emergency</span>
+</div>
+<div>
+<h3 class="text-sm font-bold text-red-900">NGƯỜI LIÊN HỆ KHẨN CẤP</h3>
+<p class="text-[10px] text-red-700/80">Dùng trong các trường hợp cần hỗ trợ từ nhà trường</p>
+</div>
+</div>
+</div>
+<div class="p-4 space-y-3 text-sm">
+<div class="flex items-center justify-between py-1">
+<span class="text-slate-500 font-normal">Họ tên &amp; Mối quan hệ</span>
+<div class="flex items-center space-x-1.5">
+<span class="text-sm text-slate-800 font-bold">Nguyễn Văn B</span>
+<span class="text-[11px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full">Bố</span>
+</div>
+</div>
+<div class="h-[1px] bg-slate-100"></div>
+<div class="flex items-center justify-between py-1">
+<span class="text-slate-500 font-normal">Số điện thoại liên lạc</span>
+<a class="inline-flex items-center space-x-1 text-sm text-[#165DFF] font-bold hover:underline" href="tel:0912345678">
+<span class="">0912.345.678</span>
+<span class="material-symbols-outlined text-[15px]">call</span>
+</a>
+</div>
+</div>
+</div>
+<!-- Regulation & Policy Notice -->
+<div class="bg-blue-50/70 border border-blue-100 rounded-2xl p-4 shadow-sm flex items-start space-x-3 text-slate-700">
+<div class="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0 text-[#165DFF] mt-0.5">
+<span class="material-symbols-outlined text-[16px]">info</span>
+</div>
+<div class="text-xs leading-relaxed font-normal">
+<p class="">
+        Để điều chỉnh hoặc cập nhật lại <strong class="font-semibold text-slate-800">CMND/CCCD</strong> và <strong class="font-semibold text-slate-800">Hộ khẩu</strong>, sinh viên vui lòng mang bản gốc đến <strong class="font-semibold text-[#165DFF]">Phòng Đào Tạo (P.102 Nhà H1)</strong> để được hỗ trợ đối soát dữ liệu trực tiếp.
+      </p>
+</div>
+</div>
+<!-- Interactive Action Sheet / Quick Copy button for ease -->
+<div class="pt-1 pb-2 flex items-center justify-center">
+<button class="w-full py-3 bg-blue-50 text-[#165DFF] hover:bg-blue-100 rounded-xl text-xs font-semibold flex items-center justify-center gap-1.5 active:scale-[0.99] transition-all shadow-xs" onclick="const btn = this; btn.innerText='Đang gửi yêu cầu...'; setTimeout(()=&gt;{btn.innerText='Đã gửi yêu cầu rà soát ✓'; btn.classList.add('bg-emerald-600','text-white');}, 700);" type="button">
+<span class="material-symbols-outlined text-[18px]">sync_problem</span>
+      Yêu cầu đính chính dữ liệu sinh viên
+    </button>
+</div>
+</div></main>
+<!-- END: MainContent -->
+<!-- BEGIN: BottomNavigation -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white border-t border-slate-200 px-6 py-2.5 z-50 flex items-center justify-around shadow-lg" data-purpose="bottom-tab-navigation">
+<!-- Tab 1: Trang chủ -->
+<button class="flex flex-col items-center justify-center text-slate-400 hover:text-slate-600 transition-colors py-0.5" type="button">
+<svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M2.25 12l8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-xs">Trang chủ</span>
+</button>
+<!-- Tab 2: Lịch học -->
+<button class="flex flex-col items-center justify-center text-slate-400 hover:text-slate-600 transition-colors py-0.5" type="button">
+<svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+<span class="text-xs">Lịch học</span>
+</button>
+<!-- Tab 3: Điểm danh (QR Beacon) -->
+<button class="flex flex-col items-center justify-center text-slate-400 hover:text-slate-600 transition-colors py-0.5" type="button">
+<div class="relative">
+<svg class="w-6 h-6 mb-1" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+<path d="M3.75 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 013.75 9.375v-4.5zM3.75 14.625c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5a1.125 1.125 0 01-1.125-1.125v-4.5zM13.5 4.875c0-.621.504-1.125 1.125-1.125h4.5c.621 0 1.125.504 1.125 1.125v4.5c0 .621-.504 1.125-1.125 1.125h-4.5A1.125 1.125 0 0113.5 9.375v-4.5z" stroke-linecap="round" stroke-linejoin="round"></path>
+<path d="M6.75 6.75h.75v.75h-.75v-.75zM6.75 16.5h.75v.75h-.75v-.75zM16.5 6.75h.75v.75h-.75v-.75zM13.5 13.5h3.75m0 0v3.75m0-3.75l3.75 3.75" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</div>
+<span class="text-xs">Điểm danh</span>
+</button>
+<!-- Tab 4: Hồ sơ (Active #165dff) -->
+<button class="flex flex-col items-center justify-center text-[#165dff] py-0.5" type="button">
+<svg class="w-6 h-6 mb-1 text-[#165dff]" fill="currentColor" viewBox="0 0 24 24">
+<path clip-rule="evenodd" d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z" fill-rule="evenodd"></path>
+</svg>
+<span class="text-xs font-semibold text-[#165dff]">Hồ sơ</span>
+</button>
+</nav>
+<!-- END: BottomNavigation -->
+</div>
+
+
+</body></html>

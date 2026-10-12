@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Thông tin Cố vấn học tập - HUCE SA</title>
+  <!-- Google Fonts: Be Vietnam Pro -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif'],
+          },
+          colors: {
+            brand: '#165DFF',
+            brandDark: '#0E46D7',
+            brandLight: '#E8F1FF',
+            surface: '#F7F9FB',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      background-color: #F7F9FB;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .header-curve {
+      border-bottom-left-radius: 36px;
+      border-bottom-right-radius: 36px;
+    }
+    .status-ping {
+      box-shadow: 0 0 0 3px #ffffff, 0 0 0 5px rgba(22, 93, 255, 0.2);
+    }
+  </style>
+</head>
+<body class="bg-[#F7F9FB] flex justify-center min-h-screen text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-700">
+
+  <!-- Mobile Container (Max 420px standard) -->
+  <div class="w-full max-w-[420px] bg-[#F7F9FB] min-h-screen pb-28 relative shadow-xl overflow-x-hidden flex flex-col justify-between">
+
+    <div>
+      <!-- Top App Bar with Blue Header Curve -->
+      <div class="bg-brand text-white pt-10 pb-16 px-4 header-curve shadow-md relative">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center space-x-3">
+            <button class="w-10 h-10 rounded-full bg-white/15 active:bg-white/25 flex items-center justify-center transition">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+              </svg>
+            </button>
+            <h1 class="text-[19px] font-bold tracking-tight text-white leading-tight">Cố vấn học tập</h1>
+          </div>
+          
+          <div class="flex items-center space-x-2">
+            <!-- Notification bell with badge -->
+            <button class="w-10 h-10 rounded-full bg-white/15 active:bg-white/25 flex items-center justify-center transition relative">
+              <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/>
+              </svg>
+              <span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full border-2 border-brand"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Subtitle pill badge -->
+        <div class="mt-3 flex items-center justify-between text-xs text-blue-100 bg-white/10 rounded-xl px-3 py-1.5 backdrop-blur-sm">
+          <div class="flex items-center space-x-1.5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span class="font-medium">Hệ thống Cố vấn học tập HUCE</span>
+          </div>
+          <span class="font-semibold text-white/90">Khóa 65 • Kỹ thuật XD</span>
+        </div>
+      </div>
+
+      <!-- Main Content Cards (Negative Margin to overlap Header Curve) -->
+      <div class="px-4 -mt-10 space-y-4">
+
+        <!-- Advisor Profile Hero Card -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100 flex flex-col items-center text-center relative overflow-hidden">
+          <div class="absolute -top-12 -right-12 w-32 h-32 bg-blue-50/60 rounded-full blur-xl pointer-events-none"></div>
+
+          <!-- Avatar with Online Status Indicator -->
+          <div class="relative mb-3">
+            <div class="w-20 h-20 rounded-full ring-4 ring-blue-50 overflow-hidden bg-slate-100 flex items-center justify-center shadow-inner">
+              <!-- Geometric Neutral Advisor Avatar -->
+              <svg class="w-12 h-12 text-brand/70" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </div>
+            <span class="absolute bottom-1 right-1 w-4 h-4 bg-emerald-500 border-2 border-white rounded-full status-ping" title="Sẵn sàng hỗ trợ"></span>
+          </div>
+
+          <!-- Status badge -->
+          <div class="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-emerald-50 border border-emerald-200/60 text-emerald-700 text-[11px] font-semibold mb-1.5">
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+            <span>Sẵn sàng hỗ trợ sinh viên</span>
+          </div>
+
+          <!-- Name & Academic Title -->
+          <h2 class="text-lg font-bold text-slate-900 tracking-tight">TS. Nguyễn Minh Hải</h2>
+          <p class="text-xs font-semibold text-brand mt-0.5">Tiến sĩ • Giảng viên chính</p>
+          
+          <div class="mt-2 text-xs text-slate-500 space-y-0.5">
+            <p class="font-medium text-slate-700">Bộ môn Kết cấu Công trình</p>
+            <p>Khoa Xây dựng Dân dụng & Công nghiệp (HUCE)</p>
+          </div>
+
+          <!-- Quick Action Buttons -->
+          <div class="grid grid-cols-3 gap-2.5 w-full mt-4 pt-4 border-t border-slate-100">
+            <!-- Call Button -->
+            <a href="tel:0912345678" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-blue-50/80 hover:bg-blue-100 active:scale-95 transition text-brand group">
+              <div class="w-9 h-9 rounded-full bg-white shadow-xs flex items-center justify-center mb-1 group-hover:scale-105 transition">
+                <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                </svg>
+              </div>
+              <span class="text-[11px] font-semibold text-slate-800">Gọi điện</span>
+              <span class="text-[9px] text-slate-500 font-mono">0912.345.678</span>
+            </a>
+
+            <!-- Email Button -->
+            <a href="mailto:hainm@huce.edu.vn" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-blue-50/80 hover:bg-blue-100 active:scale-95 transition text-brand group">
+              <div class="w-9 h-9 rounded-full bg-white shadow-xs flex items-center justify-center mb-1 group-hover:scale-105 transition">
+                <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                </svg>
+              </div>
+              <span class="text-[11px] font-semibold text-slate-800">Gửi Email</span>
+              <span class="text-[9px] text-slate-500">hainm@huce</span>
+            </a>
+
+            <!-- Zalo / Message Button -->
+            <a href="#" class="flex flex-col items-center justify-center p-2.5 rounded-xl bg-blue-50/80 hover:bg-blue-100 active:scale-95 transition text-brand group">
+              <div class="w-9 h-9 rounded-full bg-white shadow-xs flex items-center justify-center mb-1 group-hover:scale-105 transition">
+                <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/>
+                </svg>
+              </div>
+              <span class="text-[11px] font-semibold text-slate-800">Zalo Nhóm</span>
+              <span class="text-[9px] text-slate-500">Lớp 65KD1</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Class Managed Info Card -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-slate-100">
+            <div class="flex items-center space-x-2 text-slate-900 font-bold text-sm">
+              <span class="w-6 h-6 rounded-lg bg-blue-50 text-brand flex items-center justify-center">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+                </svg>
+              </span>
+              <span>Lớp phụ trách & sinh hoạt</span>
+            </div>
+            <span class="text-[11px] font-semibold text-brand bg-blue-50 px-2 py-0.5 rounded-md">Khóa 65</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 pt-0.5">
+            <div class="bg-[#F7F9FB] rounded-xl p-3 border border-slate-100">
+              <p class="text-[11px] text-slate-500">Lớp sinh viên</p>
+              <p class="text-sm font-bold text-slate-900 mt-0.5">65KD1</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">Khoa XD Dân dụng</p>
+            </div>
+            <div class="bg-[#F7F9FB] rounded-xl p-3 border border-slate-100">
+              <p class="text-[11px] text-slate-500">Sĩ số lớp</p>
+              <p class="text-sm font-bold text-brand mt-0.5">62 sinh viên</p>
+              <p class="text-[10px] text-emerald-600 font-medium mt-0.5">Đã đồng bộ CSDL</p>
+            </div>
+          </div>
+
+          <!-- Direct Zalo Group Channel Button -->
+          <div class="pt-1">
+            <a href="#" class="w-full py-2.5 px-3 rounded-xl bg-[#F0F5FF] hover:bg-blue-100/70 border border-blue-200/60 flex items-center justify-between text-brand text-xs font-semibold transition active:scale-[0.99]">
+              <div class="flex items-center space-x-2">
+                <span class="w-6 h-6 rounded-lg bg-brand text-white flex items-center justify-center text-xs font-bold font-sans">Z</span>
+                <span class="text-slate-800">Kênh Zalo trao đổi lớp 65KD1</span>
+              </div>
+              <div class="flex items-center space-x-1 text-brand text-[11px]">
+                <span>Mở nhóm</span>
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                </svg>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <!-- Office & Consultation Schedule Card -->
+        <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-100 space-y-3">
+          <div class="flex items-center space-x-2 text-slate-900 font-bold text-sm pb-2 border-b border-slate-100">
+            <span class="w-6 h-6 rounded-lg bg-blue-50 text-brand flex items-center justify-center">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+            </span>
+            <span>Văn phòng & Lịch tiếp sinh viên</span>
+          </div>
+
+          <div class="space-y-2.5 text-xs">
+            <!-- Office Address -->
+            <div class="flex items-start space-x-3 p-2.5 rounded-xl bg-[#F7F9FB] border border-slate-100">
+              <div class="w-7 h-7 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-[11px] text-slate-500 font-medium">Văn phòng làm việc</p>
+                <p class="font-bold text-slate-900 mt-0.5">P.305 - Nhà H1 (Trường ĐH Xây dựng Hà Nội)</p>
+                <p class="text-[10px] text-slate-500 mt-0.5">55 Giải Phóng, Đồng Tâm, Hai Bà Trưng, Hà Nội</p>
+              </div>
+            </div>
+
+            <!-- Consultation Hours -->
+            <div class="flex items-start space-x-3 p-2.5 rounded-xl bg-[#F7F9FB] border border-slate-100">
+              <div class="w-7 h-7 rounded-lg bg-blue-50 text-brand flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+              </div>
+              <div class="flex-1">
+                <p class="text-[11px] text-slate-500 font-medium">Lịch tiếp sinh viên thường kỳ</p>
+                <p class="font-bold text-slate-900 mt-0.5">Thứ 3 & Thứ 5 hàng tuần (14:00 - 16:30)</p>
+                <p class="text-[10px] text-emerald-600 font-semibold mt-0.5">Đang trong thời gian đăng ký gặp</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Note alert box -->
+          <div class="p-3 bg-amber-50/70 border border-amber-200/70 rounded-xl text-[11px] text-amber-900 flex items-start space-x-2">
+            <svg class="w-4 h-4 text-amber-600 shrink-0 mt-0.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <p class="leading-relaxed">
+              <span class="font-bold">Lưu ý:</span> Sinh viên vui lòng gửi email hoặc đặt lịch trước trên ứng dụng để Thầy chủ động sắp xếp thời gian tiếp đón chu đáo nhất.
+            </p>
+          </div>
+        </div>
+
+        <!-- Consultation & Thesis Booking Action Card -->
+        <div class="bg-gradient-to-br from-brand to-brandDark rounded-2xl p-4 text-white shadow-md relative overflow-hidden">
+          <div class="relative z-10 space-y-2">
+            <div class="flex items-center space-x-1.5 text-xs text-blue-200 font-semibold uppercase tracking-wider">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span>Dịch vụ sinh viên</span>
+            </div>
+            <h3 class="text-base font-bold text-white">Tư vấn Học tập & Đồ án tốt nghiệp</h3>
+            <p class="text-xs text-blue-100/90 leading-relaxed">
+              Đăng ký hẹn gặp để được giải đáp kế hoạch tín chỉ, học bổng hoặc hướng dẫn định hướng chuyên ngành xây dựng.
+            </p>
+            <div class="pt-2">
+              <button class="w-full py-2.5 px-4 rounded-xl bg-white text-brand font-bold text-xs hover:bg-blue-50 active:scale-95 transition shadow-sm flex items-center justify-center space-x-1.5">
+                <svg class="w-4 h-4 text-brand" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>Đặt lịch hẹn tư vấn học tập</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Fixed Bottom Navigation Bar (Exact 4 Tabs Matching HUCE SA) -->
+    <nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[420px] bg-white border-t border-slate-100 px-6 py-2 flex justify-between items-center z-50 shadow-[0_-4px_20px_rgba(0,0,0,0.04)]">
+      <!-- Tab 1: Trang chủ -->
+      <a href="#" class="flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-brand transition py-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/>
+        </svg>
+        <span class="text-[11px] font-medium">Trang chủ</span>
+      </a>
+
+      <!-- Tab 2: Lịch học -->
+      <a href="#" class="flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-brand transition py-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <span class="text-[11px] font-medium">Lịch học</span>
+      </a>
+
+      <!-- Tab 3: Điểm danh (Icon quét 4 góc đối xứng chuẩn) -->
+      <a href="#" class="flex flex-col items-center justify-center space-y-1 text-slate-400 hover:text-brand transition py-1">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/>
+        </svg>
+        <span class="text-[11px] font-medium">Điểm danh</span>
+      </a>
+
+      <!-- Tab 4: Hồ sơ (Active màu xanh #165DFF) -->
+      <a href="#" class="flex flex-col items-center justify-center space-y-1 text-brand py-1">
+        <svg class="w-6 h-6 text-brand" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+        </svg>
+        <span class="text-[11px] font-bold text-brand">Hồ sơ</span>
+      </a>
+    </nav>
+
+  </div>
+
+</body>
+</html>

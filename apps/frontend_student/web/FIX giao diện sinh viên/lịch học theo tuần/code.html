@@ -1,0 +1,211 @@
+<!DOCTYPE html><html lang="vi" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport">
+<title>Lịch học - HUCE SA</title>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<!-- Google Fonts: Be Vietnam Pro -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&amp;display=swap" rel="stylesheet"><link class="" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Be Vietnam Pro"', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              blue: '#165DFF',
+              darkBlue: '#0D53FC',
+              accentBlue: '#2563EB',
+              lightBlue: '#EFF6FF',
+            }
+          },
+          boxShadow: {
+            card: '0 2px 14px 0 rgba(0, 0, 0, 0.05)',
+            glow: '0 4px 14px 0 rgba(22, 93, 255, 0.3)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- Typography and Base Reset -->
+<style data-purpose="base-styles">
+    body {
+      font-family: 'Be Vietnam Pro', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      background-color: #F8FAFD;
+      color: #1E293B;
+    }
+    /* Hide scrollbars for clean native feel */
+    ::-webkit-scrollbar {
+      display: none;
+    }
+    * {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="bg-[#F6F9FD] min-h-screen flex justify-center selection:bg-blue-100 selection:text-blue-700">
+<!-- Mobile Screen Container -->
+<div class="w-full max-w-[440px] min-h-screen bg-[#F6F9FD] pb-24 relative flex flex-col shadow-2xl">
+<!-- BEGIN: Top Blue Header -->
+<header class="bg-[#165DFF] text-white pb-20 px-4 rounded-b-[36px] relative z-0 pt-14">
+<div class="flex items-center justify-between">
+<!-- Back Button & Page Title -->
+<div class="flex items-center gap-3">
+<button aria-label="Quay lại" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm transition-colors">
+<svg class="w-5 h-5 text-white stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round"></path>
+</svg>
+</button>
+<h1 class="text-xl font-bold tracking-tight">Lịch học</h1>
+</div>
+<!-- Right Action Controls -->
+<div class="flex items-center gap-2.5">
+<!-- Today Button -->
+<button class="bg-white text-[#165DFF] text-xs font-semibold px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm active:scale-95 transition-transform">
+<svg class="w-3.5 h-3.5 text-[#165DFF]" fill="currentColor" viewBox="0 0 20 20">
+<path clip-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" fill-rule="evenodd"></path>
+</svg>
+<span class="">Hôm nay</span>
+</button>
+<!-- Notification Bell Button -->
+<button aria-label="Thông báo" class="w-9 h-9 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center backdrop-blur-sm relative transition-colors">
+<svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+<path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+</svg>
+<!-- Notification Badge -->
+<span class="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-[#165DFF]"></span>
+</button>
+</div>
+</div>
+</header>
+<!-- END: Top Blue Header -->
+<!-- BEGIN: MainContent Area -->
+<main class="px-4 -mt-14 z-10 space-y-4">
+<!-- BEGIN: Calendar Card -->
+<section class="bg-white rounded-3xl p-4 shadow-card border border-slate-100/80"><!-- View Segment Control Tabs (Ngày / Tuần / Tháng) - Active Tuần -->
+<div class="bg-[#F1F4F9] p-1 rounded-2xl flex items-center justify-between text-xs font-semibold mb-3 text-slate-600">
+<button class="flex-1 py-2 text-center rounded-xl transition-all">Ngày</button>
+<button class="flex-1 py-2 text-center rounded-xl bg-[#165DFF] text-white shadow-sm font-bold transition-all">Tuần</button>
+<button class="flex-1 py-2 text-center rounded-xl transition-all">Tháng</button>
+</div>
+<!-- Week Navigation Selector -->
+<div class="flex items-center justify-between px-1 mb-3">
+<div>
+<div class="flex items-center gap-2">
+<span class="text-base font-bold text-slate-800 tracking-tight">Tuần 32 • Học kỳ 2</span>
+</div>
+<p class="text-xs text-slate-400 font-medium mt-0.5">21/04/2026 – 27/04/2026</p>
+</div>
+<div class="flex items-center gap-1.5">
+<button aria-label="Tuần trước" class="p-1.5 hover:bg-slate-100 rounded-full text-slate-500 transition-colors active:scale-95">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+<button aria-label="Tuần sau" class="p-1.5 hover:bg-slate-100 rounded-full text-slate-500 transition-colors active:scale-95">
+<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"></path></svg>
+</button>
+</div>
+</div>
+<!-- Week Days Horizontal Strip (7 days: T2 20 to CN 26) -->
+<div class="grid grid-cols-7 gap-1 pt-1 pb-1"><button class="flex flex-col items-center justify-center py-2 rounded-2xl hover:bg-slate-50 transition-colors"><span class="text-[11px] font-semibold text-slate-400 mb-1">T2</span><span class="text-sm font-bold text-slate-700">21</span><span class="w-1.5 h-1.5 bg-[#165DFF] rounded-full mt-1.5"></span></button><button class="flex flex-col items-center justify-center py-2 rounded-2xl hover:bg-slate-50 transition-colors"><span class="text-[11px] font-semibold text-slate-400 mb-1">T3</span><span class="text-sm font-bold text-slate-700">22</span><span class="w-1.5 h-1.5 bg-[#165DFF] rounded-full mt-1.5"></span></button><button class="flex flex-col items-center justify-center py-2 rounded-2xl hover:bg-slate-50 transition-colors"><span class="text-[11px] font-semibold text-slate-400 mb-1">T4</span><span class="text-sm font-bold text-slate-700">23</span><span class="w-1.5 h-1.5 bg-[#165DFF] rounded-full mt-1.5"></span></button><button class="flex flex-col items-center justify-center py-2 bg-[#165DFF] text-white rounded-2xl shadow-md transition-transform active:scale-95"><span class="text-[11px] font-bold text-white/80 mb-1">T5</span><span class="text-sm font-extrabold">24</span><span class="w-1.5 h-1.5 bg-white rounded-full mt-1.5"></span></button><button class="flex flex-col items-center justify-center py-2 rounded-2xl hover:bg-slate-50 transition-colors"><span class="text-[11px] font-semibold text-slate-400 mb-1">T6</span><span class="text-sm font-bold text-slate-700">25</span><span class="w-1.5 h-1.5 bg-[#165DFF] rounded-full mt-1.5"></span></button><button class="flex flex-col items-center justify-center py-2 rounded-2xl hover:bg-slate-50 transition-colors"><span class="text-[11px] font-semibold text-slate-400 mb-1">T7</span><span class="text-sm font-bold text-slate-700">26</span><span class="w-1.5 h-1.5 bg-[#165DFF] rounded-full mt-1.5"></span></button><button class="flex flex-col items-center justify-center py-2 rounded-2xl hover:bg-slate-50 transition-colors"><span class="text-[11px] font-semibold text-red-400 mb-1">CN</span><span class="text-sm font-bold text-red-500">27</span><span class="w-1.5 h-1.5 bg-red-500 rounded-full mt-1.5"></span></button></div></section>
+<!-- END: Calendar Card -->
+<!-- BEGIN: Date Divider Section Header -->
+<section class="flex items-center gap-3 pt-1"><!-- Date Badge -->
+<div class="bg-[#165DFF] text-white px-3.5 py-1.5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-sm shrink-0"><span class="">Th 5, 24/04</span><span class="bg-blue-400/40 text-[11px] px-2 py-0.5 rounded-md font-medium">Hôm nay • 3 sự kiện</span></div>
+<!-- Horizontal Accent Line -->
+<div class="flex-1 h-[1.5px] bg-[#165DFF]/80 rounded-full"></div></section>
+<!-- END: Date Divider Section Header -->
+<!-- BEGIN: Event Card 1 - Ongoing Class with Attendance CTA -->
+<article class="bg-white rounded-3xl p-4 shadow-md border-l-4 border-l-[#165DFF] border border-slate-200 relative"><div class="flex items-start justify-between gap-2 mb-3"><h2 class="text-base font-bold text-slate-800 leading-snug max-w-[70%]">Cấu trúc dữ liệu và giải thuật 2</h2><span class="bg-[#E7F8F0] text-[#00A86B] text-[10px] font-bold tracking-wider px-2 py-1 rounded-full uppercase border border-[#00A86B]/20 shrink-0">ĐANG DIỄN RA</span></div><div class="space-y-1.5 text-xs text-slate-600 mb-3"><div class="flex items-center"><span class="w-24 text-slate-400">Tiết :</span><span class="font-bold text-slate-800">1 - 3</span></div><div class="flex items-center"><span class="w-24 text-slate-400">Giờ :</span><span class="font-bold text-slate-800">07:30 - 10:15</span></div><div class="flex items-center"><span class="w-24 text-slate-400">Phòng :</span><span class="font-bold text-slate-900">P.MAY 4 - H1</span></div><div class="flex items-center"><span class="w-24 text-slate-400">Giảng viên :</span><span class="font-bold text-slate-900">TS. Nguyễn Minh Hải</span></div></div><div class="bg-[#165DFF] text-white p-3 rounded-2xl flex items-center justify-between gap-3 shadow-md"><div class="flex items-center gap-2.5"><div class="w-9 h-9 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0"><svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"></path><path d="M17 3h2a2 2 0 0 1 2 2v2"></path><path d="M21 17v2a2 2 0 0 1-2 2h-2"></path><path d="M7 21H5a2 2 0 0 1-2-2v-2"></path><rect fill="currentColor" height="3" rx="0.5" width="3" x="7" y="7"></rect><rect fill="currentColor" height="3" rx="0.5" width="3" x="14" y="7"></rect><rect fill="currentColor" height="3" rx="0.5" width="3" x="7" y="14"></rect><path d="M14 14h3v3h-3z" fill="currentColor"></path></svg></div><div><div class="font-bold text-xs">Điểm danh ngay</div><div class="text-[10px] text-white/80 font-normal">Quét mã QR tại lớp&nbsp;</div></div></div><button class="bg-white text-[#165DFF] hover:bg-slate-100 active:scale-95 text-[11px] font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 shadow transition-all shrink-0"><span class="">Vào điểm danh</span><svg class="w-3.5 h-3.5 stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-linecap="round" stroke-linejoin="round"></path></svg></button></div><div class="flex items-center justify-end pt-2.5 mt-2.5 border-t border-slate-100/80"><button class="flex items-center gap-1.5 text-xs font-semibold text-[#D97706] hover:text-[#B45309] active:scale-95 transition-all py-0.5 px-1.5 rounded-lg hover:bg-amber-50"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><polyline points="12 6 12 12 16 14" stroke-linecap="round" stroke-width="2"></polyline></svg><span class="">Xin nghỉ / Xin tới muộn</span></button></div></article>
+<!-- END: Event Card 1 -->
+<!-- BEGIN: Event Card 2 - Regular Lecture -->
+<article class="bg-white rounded-3xl p-4 shadow-md border-l-4 border-l-[#165DFF] border border-slate-200"><h2 class="text-base font-bold text-slate-800 leading-snug mb-3">Kết cấu Bê tông Cốt thép 1</h2><div class="space-y-1.5 text-xs text-slate-600"><div class="flex items-center"><span class="w-24 text-slate-400">Tiết :</span><span class="font-bold text-slate-800">7 - 9</span></div><div class="flex items-center"><span class="w-24 text-slate-400">Giờ :</span><span class="font-bold text-slate-800">13:15 - 15:45</span></div><div class="flex items-center"><span class="w-24 text-slate-400">Phòng :</span><span class="font-bold text-slate-900">302-H1</span></div><div class="flex items-center"><span class="w-24 text-slate-400">Giảng viên :</span><span class="font-bold text-slate-900">TS. Trần Văn Nam</span></div></div><div class="flex items-center justify-end pt-2.5 mt-3 border-t border-slate-100"><button class="flex items-center gap-1.5 text-xs font-semibold text-[#D97706] hover:text-[#B45309] active:scale-95 transition-all py-0.5 px-1.5 rounded-lg hover:bg-amber-50"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><polyline points="12 6 12 12 16 14" stroke-linecap="round" stroke-width="2"></polyline></svg><span class="">Xin nghỉ / Xin tới muộn</span></button></div></article>
+<!-- END: Event Card 2 -->
+<!-- BEGIN: Event Card 3 - Exam Schedule -->
+<article class="bg-white rounded-3xl p-4 shadow-md border-l-4 border-l-[#FF8800] border border-[#FF8800]/30"><div class="flex items-start justify-between gap-2 mb-3"><h2 class="text-base font-bold text-slate-800 leading-snug">Cơ học Đất &amp; Nền móng</h2><span class="bg-[#FFF4E6] text-[#FF8800] text-[10px] font-bold px-2.5 py-1 rounded-full uppercase border border-[#FF8800]/20 shrink-0">LỊCH THI GK</span></div><div class="space-y-1.5 text-xs text-slate-600"><div class="flex items-center"><span class="w-24 text-slate-400">Ca thi :</span><span class="font-bold text-slate-800">Ca 4</span></div><div class="flex items-center"><span class="w-24 text-slate-400">Giờ :</span><span class="font-bold text-slate-800">16:00 - 17:30</span></div><div class="flex items-center"><span class="w-24 text-slate-400">Phòng :</span><span class="font-bold text-slate-900">GD 204-A1</span></div><div class="flex items-center"><span class="w-24 text-slate-400">Số báo danh :</span><span class="font-bold text-[#165DFF]">SBD 18</span></div></div><div class="flex items-center justify-end pt-2.5 mt-3 border-t border-slate-100"><button class="flex items-center gap-1.5 text-xs font-semibold text-[#D97706] hover:text-[#B45309] active:scale-95 transition-all py-0.5 px-1.5 rounded-lg hover:bg-amber-50"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><polyline points="12 6 12 12 16 14" stroke-linecap="round" stroke-width="2"></polyline></svg><span class="">Xin nghỉ / Xin tới muộn</span></button></div></article><!-- BEGIN: Date Divider Section Header - Next Day -->
+<section class="flex items-center gap-3 pt-2">
+<div class="text-white px-3.5 py-1.5 rounded-xl font-semibold text-xs flex items-center gap-2 shadow-sm shrink-0 bg-[#165DFF]"><span class="">Th 6, 25/04</span><span class="bg-white/20 text-[11px] px-2 py-0.5 rounded-md font-medium">1 sự kiện</span></div>
+<div class="flex-1 h-[1.5px] bg-slate-200 rounded-full"></div>
+</section>
+<!-- END: Date Divider Section Header - Next Day -->
+<!-- BEGIN: Event Card 4 - Upcoming Class on Next Day -->
+<article class="bg-white rounded-3xl p-4 shadow-md border-l-4 border-l-[#165DFF] border border-slate-200">
+<div class="flex items-start justify-between gap-2 mb-3">
+<h2 class="text-base font-bold text-slate-800 leading-snug max-w-[70%]">Tin học ứng dụng trong XD</h2>
+<span class="bg-[#EBF2FF] text-[#165DFF] text-[10px] font-bold tracking-wider px-2 py-1 rounded-full uppercase border border-[#165DFF]/20 shrink-0">SẮP TỚI</span>
+</div>
+<div class="space-y-1.5 text-xs text-slate-600">
+<div class="flex items-center"><span class="w-24 text-slate-400">Tiết :</span><span class="font-bold text-slate-800">1 - 3</span></div>
+<div class="flex items-center"><span class="w-24 text-slate-400">Giờ :</span><span class="font-bold text-slate-800">07:30 - 10:15</span></div>
+<div class="flex items-center"><span class="w-24 text-slate-400">Phòng :</span><span class="font-bold text-slate-900">GD 204-A1</span></div>
+<div class="flex items-center"><span class="w-24 text-slate-400">Giảng viên :</span><span class="font-bold text-slate-900">ThS. Vũ Hoàng Long</span></div>
+</div>
+<div class="flex items-center justify-end pt-2.5 mt-3 border-t border-slate-100">
+<button class="flex items-center gap-1.5 text-xs font-semibold text-[#D97706] hover:text-[#B45309] active:scale-95 transition-all py-0.5 px-1.5 rounded-lg hover:bg-amber-50">
+<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="2"></circle><polyline points="12 6 12 12 16 14" stroke-linecap="round" stroke-width="2"></polyline></svg>
+<span class="">Xin nghỉ / Xin tới muộn</span>
+</button>
+</div>
+</article>
+<!-- END: Event Card 4 -->
+<!-- END: Event Card 3 -->
+<!-- BEGIN: Bottom Status Legend -->
+<footer class="pt-4 pb-2">
+<div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 text-xs font-medium text-slate-600">
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#10B981]"></span>
+<span class="">Lịch học</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#F59E0B]"></span>
+<span class="">Lịch thi</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#165DFF]"></span>
+<span class="">Lịch trực tuyến</span>
+</div>
+<div class="flex items-center gap-1.5">
+<span class="w-2 h-2 rounded-full bg-[#EF4444]"></span>
+<span class="">Tạm ngưng</span>
+</div>
+</div>
+</footer>
+<!-- END: Bottom Status Legend -->
+</main>
+<!-- END: MainContent Area -->
+<!-- BEGIN: Bottom Navigation Bar -->
+<nav class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[440px] bg-white border-t border-slate-100 z-50 py-2.5 px-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)] flex items-center justify-around"><!-- Tab 1: Trang chủ -->
+<a class="flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-700 transition-colors flex-1 py-1" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+<span class="text-[11px] font-medium">Trang chủ</span>
+</a>
+<!-- Tab 2: Lịch học (Active) -->
+<a class="flex flex-col items-center justify-center gap-1 text-[#165DFF] transition-colors flex-1 py-1 relative" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><rect height="18" rx="2" width="18" x="3" y="4"></rect><line x1="16" x2="16" y1="2" y2="6"></line><line x1="8" x2="8" y1="2" y2="6"></line><line x1="3" x2="21" y1="10" y2="10"></line></svg>
+<span class="text-[11px] font-semibold text-[#165DFF]">Lịch học</span>
+</a>
+<!-- Tab 3: Điểm danh -->
+<a class="flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-700 transition-colors flex-1 py-1" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2m10 0h2a2 2 0 0 1 2 2v2m0 10v2a2 2 0 0 1-2 2h-2M7 21H5a2 2 0 0 1-2-2v-2" stroke-linecap="round" stroke-linejoin="round"></path><rect fill="currentColor" height="3" rx="0.5" width="3" x="7" y="7"></rect><rect fill="currentColor" height="3" rx="0.5" width="3" x="14" y="7"></rect><rect fill="currentColor" height="3" rx="0.5" width="3" x="7" y="14"></rect><rect fill="currentColor" height="3" rx="0.5" width="3" x="14" y="14"></rect></svg>
+<span class="text-[11px] font-medium">Điểm danh</span>
+</a>
+<!-- Tab 4: Hồ sơ -->
+<a class="flex flex-col items-center justify-center gap-1 text-slate-400 hover:text-slate-700 transition-colors flex-1 py-1" href="#">
+<svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+<span class="text-[11px] font-medium">Hồ sơ</span>
+</a></nav>
+<!-- END: Bottom Navigation Bar -->
+</div>
+<!-- End Mobile Screen Container -->
+
+
+
+
+
+
+</body></html>
