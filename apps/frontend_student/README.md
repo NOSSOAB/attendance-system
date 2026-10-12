@@ -30,12 +30,15 @@ trước khi build và luôn bật đúng luồng nhận diện trên máy:
 
 ```powershell
 $env:FLUTTER_ROOT = 'C:\duong-dan\flutter'
-.\scripts\build_mobile_apk.ps1 -ApiBaseUrl 'https://ten-may-chu-cua-ban'
+.\scripts\build_mobile_apk.ps1 -ApiBaseUrl 'https://ten-may-chu-cua-ban' -Profile
 ```
 
-APK bản 1.0.13 (build 14) xuất ra
-`dist/smartattendance-mobile-first-v1.0.13-arm64-release.apk` tại thư mục gốc
-dự án. Application ID `com.smartattendance.mobile.v2` và tên hiển thị
+APK thử nghiệm bản 1.0.13 (build 14) xuất ra
+`dist/smartattendance-v1.0.13-arm64-profile-ble-c6.apk` tại thư mục gốc dự án.
+Đây là bản profile ký bằng Android Debug, chỉ để cài thử. Khi cần bản phát hành
+và đã có keystore, bỏ `-Profile`; script sẽ tạo
+`dist/smartattendance-mobile-first-v1.0.13-arm64-release.apk`.
+Application ID `com.smartattendance.mobile.v2` và tên hiển thị
 `Smart Attendance 2` cho phép cài song song với bản
 `com.smartattendance.mobile`; mỗi bản có phiên đăng nhập và khóa Android
 Keystore riêng. Nếu thiếu `API_BASE_URL`, ứng dụng production sẽ báo lỗi cấu

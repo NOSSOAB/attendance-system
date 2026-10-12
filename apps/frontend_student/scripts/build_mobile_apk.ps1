@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)]
-    [string]$ApiBaseUrl
+    [string]$ApiBaseUrl,
+    [switch]$Profile
 )
 
 $ErrorActionPreference = 'Stop'
@@ -31,7 +32,13 @@ if (-not $flutter -or -not (Test-Path -LiteralPath $flutter)) {
 
 $project = (Resolve-Path (Join-Path $PSScriptRoot '..')).Path
 $repository = (Resolve-Path (Join-Path $project '..\..')).Path
-$output = Join-Path $repository 'dist/smartattendance-mobile-first-v1.0.13-arm64-release.apk'
+$mode = if ($Profile) { 'profile' } else { 'release' }
+$fileName = if ($Profile) {
+    'smartattendance-v1.0.13-arm64-profile-ble-c6.apk'
+} else {
+    'smartattendance-mobile-first-v1.0.13-arm64-release.apk'
+}
+$output = Join-Path $repository (Join-Path 'dist' $fileName)
 New-Item -ItemType Directory -Path (Split-Path -Parent $output) -Force | Out-Null
 $python = (Get-Command python -ErrorAction SilentlyContinue).Source
 if (-not $python) { throw 'Cần Python để kiểm tra và chuẩn bị model nhận diện khuôn mặt.' }
@@ -40,14 +47,14 @@ if ($LASTEXITCODE -ne 0) { throw 'Chuẩn bị model nhận diện khuôn mặt 
 
 Push-Location $project
 try {
-    & $flutter build apk --release --target-platform android-arm64 `
+    & $flutter build apk "--$mode" --target-platform android-arm64 `
         "--dart-define=API_BASE_URL=$api" `
         '--dart-define=MOBILE_FACE_AUTH=true' `
         '--dart-define=BLE_ATTENDANCE_ENABLED=true'
     if ($LASTEXITCODE -ne 0) {
         throw "Flutter build thất bại (exit code $LASTEXITCODE)."
     }
-    Copy-Item -LiteralPath 'build/app/outputs/flutter-apk/app-release.apk' -Destination $output -Force
+    Copy-Item -LiteralPath "build/app/outputs/flutter-apk/app-$mode.apk" -Destination $output -Force
     $apk = Get-Item -LiteralPath $output
     Write-Output "$($apk.FullName) ($([math]::Round($apk.Length / 1MB, 2)) MiB)"
 } finally {
