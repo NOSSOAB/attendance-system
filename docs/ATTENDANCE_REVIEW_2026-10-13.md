@@ -15,6 +15,7 @@ Hệ thống gồm Flutter Android, API NestJS, PostgreSQL/Prisma, xác minh khu
 | Flutter | `flutter analyze` không có lỗi; 33/33 test qua |
 | Python Face Auth và ETL | 25/25 và 20/20 test qua ở lần rà soát trước |
 | Android | APK profile v1.0.13+14 build thành công cho arm64 với BLE và mobile face bật |
+| Firmware ESP32-C6 | Arduino CLI/core ESP32 3.3.11 biên dịch thành công cho `esp32:esp32:esp32c6`; 55% flash, 5% RAM tĩnh; chưa nạp board |
 | Model di động | Face Landmarker và OpenCV SFace được kiểm tra SHA-256; script tải/cài lại được cho bản clone |
 | API AWS công khai | `https://18-143-149-146.nip.io/health` trả HTTP 200 `{"status":"ok"}` |
 | SSH/triển khai EC2 | Cổng 22 còn timeout tại thời điểm rà soát; chưa đọc được cấu hình, container, migration và dữ liệu đang chạy |
