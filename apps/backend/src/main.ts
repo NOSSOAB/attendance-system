@@ -6,6 +6,10 @@ import { AppModule } from './app.module';
 import { parseRegistry } from './modules/attendance/ble-c6-verifier';
 
 async function bootstrap() {
+  const demoRoomId = process.env.BLE_DEMO_ROOM_ID?.trim();
+  if (demoRoomId && !/^ROOM_[A-Z0-9_]{1,95}$/.test(demoRoomId)) {
+    throw new Error('BLE_DEMO_ROOM_ID must be a valid room ID');
+  }
   if (
     process.env.NODE_ENV === 'production' &&
     process.env.ATTENDANCE_REQUIRE_BLE !== 'false'
@@ -14,6 +18,14 @@ async function bootstrap() {
     if (devices.size === 0) {
       throw new Error(
         'Production BLE attendance requires registered ESP32-C6 devices',
+      );
+    }
+    if (
+      demoRoomId &&
+      ![...devices.values()].some((device) => device.roomId === demoRoomId)
+    ) {
+      throw new Error(
+        'BLE_DEMO_ROOM_ID must have a registered ESP32-C6 device',
       );
     }
   }

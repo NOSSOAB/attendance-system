@@ -55,6 +55,7 @@ services:
       BLE_TEST_SERVICE_UUID: ${BLE_TEST_SERVICE_UUID:-12345678-1234-1234-1234-123456789abc}
       BLE_TEST_MIN_RSSI: ${BLE_TEST_MIN_RSSI:--80}
       BLE_C6_DEVICES_JSON: ${BLE_C6_DEVICES_JSON:-}
+      BLE_DEMO_ROOM_ID: ${BLE_DEMO_ROOM_ID:-}
       # Set false only while isolating face-auth tests. Restore true before
       # enabling BLE-backed attendance again.
       ATTENDANCE_REQUIRE_BLE: ${ATTENDANCE_REQUIRE_BLE:-true}

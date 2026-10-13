@@ -20,7 +20,7 @@ export class BleTestConfig {
   static readonly minRssi = BleTestConfig.readMinRssi();
 
   static forRoom(room: string): BleSessionExpectation {
-    const roomId = BleTestConfig.toRoomId(room);
+    const roomId = BleTestConfig.demoRoomId() || BleTestConfig.toRoomId(room);
     const devices = BleTestConfig.devicesForRoom(roomId);
     return {
       beaconId: devices[0]?.beaconId ?? BleTestConfig.beaconId,
@@ -40,8 +40,11 @@ export class BleTestConfig {
     schedule: { room: string };
   }): BleSessionExpectation {
     const fallback = BleTestConfig.forRoom(session.schedule.room);
-    const beaconId = session.beaconId?.trim() || fallback.beaconId;
-    const roomId = session.roomId?.trim() || fallback.roomId;
+    const demoRoomId = BleTestConfig.demoRoomId();
+    const beaconId = demoRoomId
+      ? fallback.beaconId
+      : session.beaconId?.trim() || fallback.beaconId;
+    const roomId = demoRoomId || session.roomId?.trim() || fallback.roomId;
     return {
       ...fallback,
       beaconId,
@@ -117,6 +120,10 @@ export class BleTestConfig {
   private static readMinRssi() {
     const configured = Number(process.env.BLE_TEST_MIN_RSSI ?? -80);
     return Number.isFinite(configured) ? Math.round(configured) : -80;
+  }
+
+  private static demoRoomId() {
+    return process.env.BLE_DEMO_ROOM_ID?.trim() || '';
   }
 
   private static devicesForRoom(roomId: string) {

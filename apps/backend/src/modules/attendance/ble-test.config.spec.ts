@@ -4,6 +4,7 @@ import { parseRegistry } from './ble-c6-verifier';
 
 describe('BleTestConfig with ESP32-C6', () => {
   const previousRegistry = process.env.BLE_C6_DEVICES_JSON;
+  const previousDemoRoom = process.env.BLE_DEMO_ROOM_ID;
   const key = Buffer.from('0123456789abcdeffedcba9876543210', 'hex');
   const now = new Date();
   const session = {
@@ -38,6 +39,7 @@ describe('BleTestConfig with ESP32-C6', () => {
   };
 
   beforeEach(() => {
+    delete process.env.BLE_DEMO_ROOM_ID;
     process.env.BLE_C6_DEVICES_JSON = JSON.stringify([
       {
         deviceId: 'a1b2c3d4',
@@ -51,6 +53,29 @@ describe('BleTestConfig with ESP32-C6', () => {
   afterAll(() => {
     if (previousRegistry === undefined) delete process.env.BLE_C6_DEVICES_JSON;
     else process.env.BLE_C6_DEVICES_JSON = previousRegistry;
+    if (previousDemoRoom === undefined) delete process.env.BLE_DEMO_ROOM_ID;
+    else process.env.BLE_DEMO_ROOM_ID = previousDemoRoom;
+  });
+
+  it('uses one registered beacon for every demo room and existing session', () => {
+    process.env.BLE_DEMO_ROOM_ID = expected.roomId;
+    expect(BleTestConfig.forRoom('Phòng B202')).toMatchObject({
+      roomId: expected.roomId,
+      deviceIds: ['a1b2c3d4'],
+    });
+    const existingSession = BleTestConfig.fromSession({
+      beaconId: 'OLD_BEACON',
+      roomId: 'ROOM_B202',
+      schedule: { room: 'Phòng B202' },
+    });
+    expect(existingSession).toMatchObject({
+      beaconId: expected.beaconId,
+      roomId: expected.roomId,
+      deviceIds: ['a1b2c3d4'],
+    });
+    expect(
+      BleTestConfig.validate(validEvidence, existingSession, session),
+    ).toBeNull();
   });
 
   it('authenticates the beacon and accepts a matching classroom', () => {

@@ -22,7 +22,10 @@
    `firmware/esp32-c6/README.md`, nạp firmware vào board, rồi đặt
    `BLE_C6_DEVICES_JSON` trong `infra/.env`. Mỗi mục chứa `deviceId`,
    `beaconId`, `roomId` và `keyHex`; thông tin này chỉ lưu trên EC2.
-   Giữ `ATTENDANCE_REQUIRE_BLE=true`.
+   Giữ `ATTENDANCE_REQUIRE_BLE=true`. Nếu chỉ có một board cho bản demo,
+   đặt `BLE_DEMO_ROOM_ID` bằng `roomId` của board để mọi phiên dùng chung
+   beacon đó; tên phòng trong lịch không đổi. Bỏ cấu hình này khi có beacon
+   riêng tại từng phòng.
 
 ## Khởi động
 
