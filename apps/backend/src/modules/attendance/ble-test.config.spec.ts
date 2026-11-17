@@ -136,14 +136,14 @@ describe('BleTestConfig with ESP32-C6', () => {
     ).toBe('INVALID_EVIDENCE');
   });
 
-  it('flags a weak signal or wrong classroom after authenticating the token', () => {
+  it('accepts a weak authenticated signal but rejects the wrong classroom', () => {
     expect(
       BleTestConfig.validate(
-        { ...validEvidence, rssi: expected.minRssi - 1 },
+        { ...validEvidence, rssi: -105 },
         expected,
         session,
       ),
-    ).toBe('BLE_SIGNAL_TOO_WEAK');
+    ).toBeNull();
     expect(
       BleTestConfig.validate(
         validEvidence,

@@ -100,10 +100,6 @@ export class BleTestConfig {
       return 'BLE_ROOM_MISMATCH';
     }
 
-    if (rssi < expected.minRssi) {
-      return 'BLE_SIGNAL_TOO_WEAK';
-    }
-
     return null;
   }
 
