@@ -19,7 +19,7 @@ class AppHttpClient extends http.BaseClient {
   AppHttpClient({
     http.Client? inner,
     AuthSessionController? sessions,
-    this.timeout = const Duration(seconds: 30),
+    this.timeout = const Duration(seconds: 90),
   }) : _inner = inner ?? http.Client(),
        _sessions = sessions ?? AuthSessionController.instance;
 

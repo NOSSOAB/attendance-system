@@ -106,6 +106,14 @@ class _SchoolSelectScreenState extends State<SchoolSelectScreen> {
     }
   }
 
+  void _retryLoadSchools() {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+    _loadSchools();
+  }
+
   List<SchoolModel> get _filteredSchools {
     final keyword = _searchController.text.trim().toLowerCase();
 
@@ -404,15 +412,24 @@ class _SchoolSelectScreenState extends State<SchoolSelectScreen> {
       return Padding(
         padding: const EdgeInsets.only(top: 42),
         child: Center(
-          child: Text(
-            _errorMessage!,
-            textAlign: TextAlign.center,
-            style: _font(
-              size: 15,
-              weight: FontWeight.w600,
-              color: Colors.red,
-              height: 1.4,
-            ),
+          child: Column(
+            children: [
+              Text(
+                _errorMessage!,
+                textAlign: TextAlign.center,
+                style: _font(
+                  size: 15,
+                  weight: FontWeight.w600,
+                  color: Colors.red,
+                  height: 1.4,
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: _retryLoadSchools,
+                child: const Text('Thử lại'),
+              ),
+            ],
           ),
         ),
       );
