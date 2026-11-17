@@ -161,9 +161,6 @@ class _StudentHomeScreenState extends State<StudentHomeScreen> {
     if (evidence == null) {
       throw Exception('Không tìm thấy BLE của phòng ${item.room}');
     }
-    if (evidence.rssi < item.expectedBle.minRssi) {
-      throw Exception('Tín hiệu BLE của phòng học quá yếu');
-    }
     return evidence;
   }
 
