@@ -23,4 +23,9 @@ describe('createPgPoolConfig', () => {
     process.env.DATABASE_POOL_MAX = '500';
     expect(createPgPoolConfig('postgresql://localhost/test').max).toBe(50);
   });
+
+  it('allows a single connection per serverless instance', () => {
+    process.env.DATABASE_POOL_MAX = '1';
+    expect(createPgPoolConfig('postgresql://localhost/test').max).toBe(1);
+  });
 });
