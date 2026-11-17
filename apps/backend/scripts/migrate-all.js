@@ -80,9 +80,32 @@ function migrateDatabases() {
   }
 }
 
+async function ensureSchoolCatalog() {
+  const centralUrl = getRequiredUrl('DATABASE_URL');
+  const central = new Client({ connectionString: centralUrl.toString() });
+
+  await central.connect();
+  try {
+    await central.query(
+      `INSERT INTO "School" ("code", "name", "updatedAt")
+       VALUES ($1, $2, NOW()), ($3, $4, NOW())
+       ON CONFLICT ("code") DO NOTHING`,
+      [
+        'HUCE',
+        'Đại học Xây dựng Hà Nội',
+        'HUST',
+        'Đại học Bách khoa Hà Nội',
+      ],
+    );
+  } finally {
+    await central.end();
+  }
+}
+
 async function main() {
   await ensureDatabasesExist();
   migrateDatabases();
+  await ensureSchoolCatalog();
 }
 
 main().catch((error) => {
